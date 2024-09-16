@@ -51,7 +51,7 @@ LEVELS_API_KEY = os.getenv('LEVELS_API_KEY')
 SECRET_KEY = 'django-insecure-6+&#l!*$o^64k*fp_tl^_wlq97!d8utyvcd@pcp_!57-&%vs16'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = 'FALSE'
+DEBUG = 'False'
 
 ALLOWED_HOSTS = ['*']
 
