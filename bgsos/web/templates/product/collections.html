@@ -1,0 +1,50 @@
+<!-- catalog/templates/collections.html -->
+{% extends "layout/base.html" %}
+
+{% load custom_filters %}
+
+{% block content %}
+            <div class="breadcrumbs">
+                <div class="container">
+                    <div class="row">
+                        <div class="col">
+                            <p class="bread"><span><a href="{% url "index" %}">Home</a></span><span>Product Collections</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    
+    
+            <div class="page-content">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="page-wrap">
+                                <h1>Collections</h1>
+                                <div class="row">
+                                    {% for collection in collections %}
+                                    <div class="col-md-4 mb-4">
+                                        <div class="card h-100">
+                                            <img src="{{ product.thumbnail|cache_image }}" class="card-img-top" alt="{{ product.title }}">
+                                            <div class="card-body">
+                                                <h5 class="card-title">
+                                                    <center><a href="{% url 'collection_products' collection.id %}" class="text-dark">{{ collection.title }}</a></center>
+                                                </h5>
+                                                <center><p class="card-text text-dark"></p></center>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+    
+ 
+{% endblock %}
+
+
+

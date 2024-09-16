@@ -1,0 +1,52 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+    <title>{% block title %}{{ site_settings.website_title }}{% endblock %}</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,500,600,700" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Rokkitt:100,300,400,700" rel="stylesheet">
+    
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/animate.css">
+    <!-- Icomoon Icon Fonts-->
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/icomoon.css">
+    <!-- Ion Icon Fonts-->
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/ionicons.min.css">
+    <!-- Bootstrap  -->
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/bootstrap.min.css">
+
+    <!-- Magnific Popup -->
+    <!-- <link rel="stylesheet" href="{{ STATIC_URL }}css/magnific-popup.css"> -->
+
+    <!-- Flexslider  -->
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/flexslider.css">
+
+    <!-- Owl Carousel -->
+    <!-- <link rel="stylesheet" href="{{ STATIC_URL }}css/owl.carousel.min.css"> -->
+    <!-- <link rel="stylesheet" href="{{ STATIC_URL }}css/owl.theme.default.min.css"> -->
+    
+    <!-- Date Picker -->
+    <!-- <link rel="stylesheet" href="{{ STATIC_URL }}css/bootstrap-datepicker.css"> -->
+    <!-- Flaticons  -->
+    <link rel="stylesheet" href="{{ STATIC_URL }}fonts/flaticon/font/flaticon.css">
+
+    <!-- Theme style  -->
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/style.css">
+
+    </head>
+    <body>
+
+    <div id="page">
+        {% include 'shared/nav.html' %}
+
+        {% block content %}{% endblock content %}
+
+        {% include 'shared/footer.html' %}
+
+    </div>
+
+    </body>
+</html>
+

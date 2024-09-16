@@ -1,0 +1,25 @@
+<!-- templates/select_shipping_method.html -->
+{% extends "layout/base.html" %}
+{% load custom_filters %}
+
+{% block title %}
+Select Shipping Method
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>Select Shipping Method</h1>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="shipping-option">Shipping Options</label>
+            <select class="form-control" id="shipping-option" name="option_id">
+                {% for option in shipping_options %}
+                <option value="{{ option.id }}">{{ option.name }} | ${{option.price_incl_tax|cents_to_dollars|floatformat:2}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Select</button>
+    </form>
+</div>
+{% endblock %}

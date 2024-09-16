@@ -1,0 +1,146 @@
+{% extends "layout/base.html" %}
+{% load custom_filters %}
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+<div class="container">
+      <h1>Welcome, {{ customer.first_name }} {{ customer.last_name }}</h1>
+
+      <div class="container mt-4">
+        <div class="bg-light rounded p-3 d-flex justify-content-between align-items-center flex-wrap margin">
+                <h5 class="card-title">Username</h5>
+                <p class="card-text fs-4">{{ customer.email | strip_tg_prof}}</p>
+            </div>
+            </div>
+
+    <div class="container mt-4">
+  <div class="bg-light rounded p-3 d-flex justify-content-between align-items-center flex-wrap margin">
+          <h5 class="card-title">Current Points</h5>
+          <h5 class="card-text fs-4">{{ level.total_points_last_year}}</h5>
+      </div>
+      </div>
+
+     
+      <div class="container mt-4">
+        
+          </div>
+
+
+     <h2>Loyalty Points</h2>
+
+    <div class="card-deck mb-3 text-center">
+        <div class="card mb-4 box-shadow" {% if level.level == 'Bronze' %}style="background-color: #cd7f32; color: #fff;"{% endif %}>
+          <div class="card-header bronze-header" style="background-color: #cd7f32;">
+            <h4 class="my-0 font-weight-normal">Bronze</h4>
+          </div>
+          <div class="card-body">
+            <h1 class="card-title pricing-card-title">0 <small class="text-muted"></small></h1>
+            <ul class="list-unstyled mt-3 mb-4">
+              <li>Exclusive Discounts</li>
+              <li>Community support</li>
+              
+            </ul>
+            
+          </div>
+        </div>
+        <div class="card mb-4 box-shadow" {% if level.level == 'Silver' %}style="background-color: #c0c0c0; color: #fff;"{% endif %}>
+          <div class="card-header silver-header" style="background-color: #c0c0c0;">
+            <h4 class="my-0 font-weight-normal">Silver</h4>
+          </div>
+          <div class="card-body">
+            <h1 class="card-title pricing-card-title">50<small class="text-muted"></small></h1>
+            <p><strong>Earn {{ 50|subtract:level.total_points_last_year|round_up }} more points to reach Silver</strong></p>
+            <ul class="list-unstyled mt-3 mb-4">
+              <li>$10 Discount</li>
+              <li>Live chat support</li>
+              
+
+            </ul>
+            
+          </div>
+        </div>
+        <div class="card mb-4 box-shadow" {% if level.level == 'Gold' %}style="background-color: #ffd700; color: #fff;"{% endif %}>
+          <div class="card-header" style="background-color: #ffd700;">
+            <h4 class="my-0 font-weight-normal">Gold</h4>
+          </div>
+          <div class="card-body">
+            <h1 class="card-title pricing-card-title">100<small class="text-muted"></small></h1>
+            <p><strong>Earn {{ 100|subtract:level.total_points_last_year|round_up }} more points to reach Gold</strong></p>
+            <ul class="list-unstyled mt-3 mb-4">
+                <li>$20 Discount</li>
+                <li>Dedicated Account Manager</li>
+                
+            </ul>
+            
+          </div>
+        </div>
+
+        <div class="card mb-4 box-shadow" {% if level.level == 'Platinum' %}style="background-color: #e5e4e2;"{% endif %}>
+          <div class="card-header" style="background-color: #e5e4e2;">
+            <h4 class="my-0 font-weight-normal">Platinum</h4>
+          </div>
+          <div class="card-body">
+            <h1 class="card-title pricing-card-title">200<small class="text-muted"></small></h1>
+            <p><strong>Earn {{ 200|subtract:level.total_points_last_year|round_up }} more points to reach Platinum</strong></p>
+            <ul class="list-unstyled mt-3 mb-4">
+                <li>3% Discount</li>
+                <li>Free Shipping</li>
+                
+            </ul>
+            
+          </div>
+        </div>
+
+        <div class="card mb-4 box-shadow" {% if level.level == 'Diamond' %}style="background-color: #b9f2ff; color: #fff;"{% endif %}>
+          <div class="card-header" style="background-color: #b9f2ff;">
+            <h4 class="my-0 font-weight-normal">Diamond</h4>
+          </div>
+          <div class="card-body">
+            <h1 class="card-title pricing-card-title">500<small class="text-muted"></small></h1>
+            <p><strong>Earn {{ 500|subtract:level.total_points_last_year|round_up }} more points to reach Diamond</strong></p>
+            <ul class="list-unstyled mt-3 mb-4">
+                <li>5% Discount</li>
+                <li>Free Shipping</li>
+                
+            </ul>
+            
+          </div>
+        </div>
+      </div>
+
+
+      <h2>Loyalty Program Overview</h2>
+
+    <h3>What’s a loyalty program?</h3>
+    <p>The applying point system to reward our customers for choosing us as your vendor. Loyalty levels will be determined by points you earn in the previous year and it will be reset every year.
+      Each level has different privileges. They can be either discounts or some exclusive services. Please see above for the details.</p>
+
+    <h3>How can I earn points?</h3>
+    <p>There are three ways to earn points:</p>
+    <ul>
+        <li><strong>Purchasing from our Telegram shop:</strong> 1% of your purchases will be added to your points.</li>
+        <li><strong>Referring our Telegram shop to a friend:</strong> 5% of your friend's total {{ site_settings.currency_code|upper }} expenditure will be converted and added to your points.</li>
+        <li><strong>Referring our Telegram Channel to a friend:</strong> 1 point will be added to your points.</li>
+    </ul>
+
+    <h3>How long are my points valid for?</h3>
+    <p>Points are valid for use until 31st December of each year. The remaining points will be used to determine your level in the following year.</p>
+
+    <h3>Can I use my points?</h3>
+    <p>Yes, you can use your points as {{ site_settings.currency_code|upper }} on your purchases. However, please note that your loyalty level and privileges for the following year are determined by the remaining points you have at the end of the year.</p>
+
+    <h3>Can I cash out my points?</h3>
+    <p>No, you cannot cash out your points.</p>
+
+    <h3>How do I use my points?</h3>
+    <p>We are currently working on automating this process. Please contact our friendly staff on Telegram, via @Telegram, to specify how many points you would like to use.</p>
+
+    <h3>Must I sign up to join this program?</h3>
+    <p>Yes, you must sign up. While we understand that some customers prefer to order as guests to maintain anonymity, we need a reference to trace your order volume. Therefore, becoming a member is essential.</p>
+
+
+
+</div>
+
+
+{% endblock %}

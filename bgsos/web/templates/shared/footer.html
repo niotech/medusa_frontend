@@ -1,0 +1,55 @@
+        <footer id="colorlib-footer" role="contentinfo">
+            <div class="container">
+                <div class="row row-pb-md">
+                    <div class="col footer-col colorlib-widget">
+                        <h4>About {{ site_settings.website_title }}</h4>
+                        <p>
+                            <ul class="colorlib-footer-links">
+                                <li><a href="{% url 'page_detail' 'shipping-policy' %}">Shipping Policy</a></li>
+                                <li><a href="{% url 'page_detail' 'contact' %}">Contact</a></li>
+                                
+                            </ul>
+                        </p>
+                        {% if site_settings.display_social_links %}
+                        <p>
+                            <ul class="colorlib-social-icons">
+                                <li><a href="{{ site_settings.instagram }}" target="_blank"><i class="icon-instagram"></i></a></li>
+                                <li><a href="{{ site_settings.facebook }}" target="_blank"><i class="icon-facebook"></i></a></li>
+                            </ul>
+                        </p>
+                        {% endif %}
+                    </div>
+                    <div class="col footer-col colorlib-widget">
+                        
+                    </div>
+                    <div class="col footer-col colorlib-widget">
+                        
+                    </div>
+
+                    <div class="col footer-col">
+                        
+                    </div>
+
+                    {% if site_settings.display_contact_info %}
+                    <div class="col footer-col">
+                        <h4>Contact Information</h4>
+                        <ul class="colorlib-footer-links">
+                            <li>{{ site_settings.contact_address|safe }}</li>
+                            <li><a href="tel://{{ site_settings.contact_phone }}">{{ site_settings.contact_phone }}</a></li>
+                            <li><a href="mailto:{{ site_settings.contact_email }}">{{ site_settings.contact_email }}</a></li>
+                        </ul>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="copy">
+                <div class="row">
+                    <div class="col-sm-12 text-center">
+                        <p>
+                            <span>
+Copyright &copy;<script>document.write(new Date().getFullYear());</script> All rights reserved <a href="{% url "index" %}">{{ site_settings.website_title }}</a></span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </footer>

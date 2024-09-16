@@ -1,0 +1,92 @@
+{% extends "layout/base.html" %}
+{% load custom_filters %}
+
+{% block title %}
+{{ product.title }}
+{% endblock %}
+
+{% block content %}
+<div class="breadcrumbs">
+            <div class="container">
+                <div class="row">
+                    <div class="col">
+                        <p class="bread"><span><a href="{% url "index" %}">Home</a></span><span>Product: {{ product.title }}</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="page-content">
+            <div class="container">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="page-wrap">
+                            <h1>{{ product.title }}</h1>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <img src="{{ product.thumbnail|cache_image }}" class="card-img-top" alt="{{ product.title }}">
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="alert alert-primary" role="alert">
+                                        {% for variant in product.variants %}
+                                        {% for price in variant.prices %}
+                                        {% if forloop.parentloop.last and forloop.last %}
+                                        Earn up to + {{ price.amount|cents_to_points }} loyalty points
+                                        {% endif %}
+                                        {% endfor %}
+                                        {% endfor %}
+                                    </div>
+
+                                    <form id="add-to-cart-form" method="post" action="{% url 'add_to_cart' 0 1 %}" style="display: inline;">
+                                        {% csrf_token %}
+                                        <div class="form-group">
+                                            {% for option in product.options %}
+                                            <label for="option-{{ option.id }}" class="font-weight-bold text-primary">{{ option.title }}</label>
+                                            <select name="{{ option.id }}" id="option-{{ option.id }}" class="form-control variant-option" required>
+                                                <option value="" disabled selected>Select {{ option.name }}</option>
+                                                {% for variant in product.variants %}
+                                                {% for variant_option in variant.options %}
+                                                {% if variant_option.option_id == option.id %}
+                                                {% for price in variant.prices %}
+                                                {% if price.currency_code == site_settings.currency_code %}
+                                                <option value="{{ variant.id }}" data-price="{{ price.amount }}">
+                                                    {{ variant_option.value }} | ${{ price.amount|cents_to_dollars|floatformat:2 }}
+                                                </option>
+                                                {% endif %}
+                                                {% endfor %}
+                                                {% endif %}
+                                                {% endfor %}
+                                                {% endfor %}
+                                            </select>
+                                            {% endfor %}
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">Add to Cart</button>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <h2>Description</h2>
+                            <hr>
+                            <p>{{ product.description }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+{% endblock %}
+
+{% block sidebar %}
+{{ block.super }}
+{% if perms.catalog.change_product or perms.catalog.delete_product %}
+<hr>
+<ul class="sidebar-nav">
+    {% if perms.catalog.change_product %}
+    <li><a href="{% url 'product-update' product.id %}">Update Product</a></li>
+    {% endif %}
+    {% if not product.variants and perms.catalog.delete_product %}
+    <li><a href="{% url 'product-delete' product.id %}">Delete Product</a></li>
+    {% endif %}
+</ul>
+{% endif %}
+{% endblock %}

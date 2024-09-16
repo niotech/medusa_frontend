@@ -1,0 +1,53 @@
+<!-- catalog/templates/product_list.html -->
+{% extends "layout/base.html" %}
+
+{% block content %}
+            <div class="breadcrumbs">
+                <div class="container">
+                    <div class="row">
+                        <div class="col">
+                            <p class="bread"><span><a href="{% url "index" %}">Home</a></span><span>Products</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    
+    
+            <div class="page-content">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="page-wrap">
+                                <h1>Products</h1>
+
+                                <div class="row">
+                                    {% for product in products %}
+                                    <div class="col-md-4 mb-4">
+                                        <div class="card h-100">
+                                            <img src="{{ product.thumbnail|cache_image }}" class="card-img-top" alt="{{ product.title }}">
+                                            <div class="card-body">
+                                                <h5 class="card-title">
+                                                    <a href="{% url 'product_detail' product.id %}">{{ product.title }}</a>
+                                                </h5>
+                                                <p class="card-text">product.description</p>
+                                                {% if product.variants %}
+                                                <form action="{% url 'add_to_cart' product.variants.0.id 1 %}" method="post">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="variant_id" value="{{ product.variants.0.id }}">
+                                                    <input type="hidden" name="qty" value="1">
+                                                    <button type="submit" class="btn btn-primary">Add to Cart</button>
+                                                </form>
+                                                {% else %}
+                                                <p class="text-danger">No variants available</p>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>                         
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+{% endblock %}

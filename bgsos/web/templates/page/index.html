@@ -1,0 +1,85 @@
+{% extends "layout/base.html" %}
+
+{% load custom_filters %}
+
+{% block content %}
+        {% if site_settings.banner %}
+        <aside id="colorlib-hero">
+            <div class="flexslider">
+                <ul class="slides">
+                    <li style="background-image: url({{ site_settings.banner.url  }}); width: 100%; float: left; margin-right: -100%; position: relative; opacity: 1; display: block; z-index: 2;" class="flex-active-slide">
+                        <div class="overlay"></div>
+                        <div class="container-fluid">
+                            <div class="row">
+                                <div class="col-sm-6 offset-sm-3 text-center slider-text animated fadeInUp">
+                                    <div class="slider-text-inner">
+                                        <div class="desc">
+                                            {% if site_settings.banner_headline %}<h1 class="head-1">{{ site_settings.banner_headline }}</h1>{% endif %}
+                                            {% if site_settings.banner_subheading %}<h2 class="head-2">{{ site_settings.banner_subheading }}</h2>{% endif %}
+                                            <!-- <h2 class="head-3">Collection</h2>
+                                            <p class="category"><span>New trending shoes</span></p> -->
+                                            {% if site_settings.banner_button_text and site_settings.banner_button_url %}
+                                            <p><a href="{{ site_settings.banner_button_url }}" class="btn btn-primary">{{ site_settings.banner_button_text }}</a></p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+        {% endif %}
+
+        
+        <!-- <div class="colorlib-intro">
+            <div class="container">
+                <div class="row">
+                    <div class="col-sm-12 text-center">
+                        <h2 class="intro">{{ site_settings.banner_headline }}</h2>
+                    </div>
+                </div>
+            </div>
+        </div> -->
+        
+        <div class="colorlib-product product-collection-cards">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-sm-6 text-center">
+                        <div class="featured">
+                            {% if site_settings.left_collection_image %}
+                            <a href="{{ site_settings.left_collection_url|default_if_none:'#' }}" class="featured-img fixed-size-img" style="background-image: url({{ site_settings.left_collection_image.url }});"></a>
+                            {% endif %}
+                            <div class="desc">
+                                <h2>
+                                    <a href="{{ site_settings.left_collection_url|default_if_none:'#' }}">
+                                        {{ site_settings.left_collection_title|default_if_none:'' }}
+                                        <span>{{ site_settings.left_collection_sub_title|default_if_none:'' }}</span>
+                                    </a>
+                                </h2>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-sm-6 text-center">
+                        <div class="featured">
+                            {% if site_settings.right_collection_image %}
+                            <a href="{{ site_settings.right_collection_url|default_if_none:'#' }}" class="featured-img fixed-size-img" style="background-image: url({{ site_settings.right_collection_image.url  }});"></a>
+                            {% endif %}
+                            <div class="desc">
+                                <h2>
+                                    <a href="{{ site_settings.right_collection_url|default_if_none:'#' }}">
+                                        {{ site_settings.right_collection_title|default_if_none:'' }}
+                                        <span>{{ site_settings.right_collection_sub_title|default_if_none:'' }}</span>
+                                    </a>
+                                </h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+
+{% endblock %}

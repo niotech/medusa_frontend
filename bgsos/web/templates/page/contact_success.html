@@ -1,0 +1,43 @@
+{% extends "layout/base.html" %}
+
+
+{% block banner %}
+<div class="banner-wrapper"> 
+    <div class="position-relative overflow-hidden p-3 text-center bg-light " style="background-image: url({{ site_settings.banner.url }}); background-size: cover; background-position: center;">
+        <div class="col-md-5 p-lg-5 mx-auto my-5">
+            {% if site_settings.banner_headline %}
+                <h1 class="display-4 font-weight-normal">{{ site_settings.banner_headline }}</h1>
+            {% endif %}
+            {% if site_settings.banner_subheading %}
+                <p class="lead font-weight-normal">{{ site_settings.banner_subheading }}</p>
+            {% endif %}
+            {% if site_settings.banner_button_text and site_settings.banner_button_url %}
+                <a class="btn btn-outline-secondary" href="{{ site_settings.banner_button_url }}">{{ site_settings.banner_button_text }}</a>
+            {% endif %}
+        </div>
+        <div class="product-device box-shadow d-none d-md-block"></div>
+        <div class="product-device product-device-2 box-shadow d-none d-md-block"></div>
+    </div>
+</div>
+{% endblock %}
+
+
+{% block content %}
+        <div class="breadcrumbs">
+            <div class="container">
+                <div class="row">
+                    <div class="col">
+                        <p class="bread"><span><a href="{% url "index" %}">Home</a></span> / <span>Contact</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-12">
+                    <h3>Thanks You!</h3>
+                </div>
+            </div>
+        </div>
+{% endblock %}

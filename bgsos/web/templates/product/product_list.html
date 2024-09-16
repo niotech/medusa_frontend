@@ -1,0 +1,46 @@
+<!-- catalog/templates/product_list.html -->
+{% extends "layout/base.html" %}
+
+{% load custom_filters %}
+
+{% block content %}
+            <div class="breadcrumbs">
+                <div class="container">
+                    <div class="row">
+                        <div class="col">
+                            <p class="bread"><span><a href="{% url "index" %}">Home</a></span><span>Products</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    
+    
+            <div class="page-content">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="page-wrap">
+                                <h1>Products</h1>
+
+                                <div class="row row-pb-md">
+                                    {% for product in products %}
+                                    <div class="col-lg-3 mb-4 text-center">
+                                        <div class="product-entry border">
+                                            <a href="{% url 'product_detail' product.id %}" class="prod-img">
+                                                <img src="{{ product.thumbnail|cache_image }}" class="card-img-top fixed-size-img" alt="{{ product.title }}">
+                                            </a>
+                                            <div class="desc">
+                                                <h2><a href="{% url 'product_detail' product.id %}">{{ product.title }}</a></h2>
+                                                <span class="price">{{ product|price_info }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>     
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    
+{% endblock %}

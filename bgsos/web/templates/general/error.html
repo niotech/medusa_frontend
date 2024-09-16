@@ -1,0 +1,32 @@
+{% extends "layout/base.html" %}
+{% block title %}
+Error
+{% endblock %}
+
+{% block content %}
+            <div class="breadcrumbs">
+                <div class="container">
+                    <div class="row">
+                        <div class="col">
+                            <p class="bread"><span><a href="{% url "index" %}">Home</a></span><span>Error</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    
+    
+            <div class="page-content">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="page-wrap">
+                                <h1>Error</h1>
+                            <p>{{ message }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        
+{% endblock %}

@@ -1,0 +1,37 @@
+<!-- templates/catalog/update_shipping.html -->
+{% extends "layout/base.html" %}
+{% load custom_filters %}
+{% block title %}
+Address
+{% endblock %}
+
+{% block content %}
+            <div class="breadcrumbs">
+                <div class="container">
+                    <div class="row">
+                        <div class="col">
+                            <p class="bread"><span><a href="{% url "index" %}">Home</a></span><span>Shipping</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    
+    
+            <div class="page-content">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="page-wrap">
+                                <h1>Update Shipping Details</h1>
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <!-- Include form fields for shipping details -->
+                                    <button type="submit">Update</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+</body>
+</html>
