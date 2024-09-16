@@ -51,7 +51,9 @@ LEVELS_API_KEY = os.getenv('LEVELS_API_KEY')
 SECRET_KEY = 'django-insecure-6+&#l!*$o^64k*fp_tl^_wlq97!d8utyvcd@pcp_!57-&%vs16'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = 'False'
+DEBUG = False
+
+FORCE_SERVE_STATIC = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -155,7 +157,7 @@ STATIC_URL = '/static/'
 
 # Media files (user-uploaded content)
 # URL to use when referring to media files in templates
-MEDIA_URL = '/media/'
+MEDIA_URL = 'media/'
 # Absolute path to the directory where media files are stored
 MEDIA_ROOT = BASE_DIR / 'media'
 

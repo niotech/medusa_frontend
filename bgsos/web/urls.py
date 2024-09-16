@@ -1,3 +1,5 @@
+from django.conf import settings
+from django.conf.urls.static import static
 from django.urls import path
 from . import views
 
@@ -51,3 +53,10 @@ urlpatterns = [
     # Generic page view using slug
     path('<slug:slug>/', views.PageDetailView.as_view(), name='page_detail'),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+elif getattr(settings, 'FORCE_SERVE_STATIC', False):
+    settings.DEBUG = True
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    settings.DEBUG = False
