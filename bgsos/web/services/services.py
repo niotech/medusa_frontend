@@ -2,6 +2,7 @@ import requests
 from requests.adapters import HTTPAdapter
 from requests.exceptions import RequestException
 
+import urllib3
 from urllib3.util.retry import Retry
 from django.conf import settings  # Import settings from Django
 
@@ -27,9 +28,11 @@ proxies = {
 # Creating a session and configuring it
 session = requests.Session()
 
+timeout = urllib3.util.Timeout(connect=5.0, read=10.0)
+
 # Adding retry strategy
 retry = Retry(
-    total=3,
+    total=0,
     read=3,
     connect=3,
     backoff_factor=1,
@@ -252,7 +255,7 @@ def customer_login(email, password):
         'email': email,
         'password': password,
     }
-    return session.post(f'{backendUrl}/store/auth', headers=headers, json=data)
+    return session.post(f'{backendUrl}/store/auth', headers=headers, json=data, timeout=timeout)
 
 
 def customer_logout(access_token):
