@@ -18,10 +18,8 @@ USDT Payment Address
                     <img src="data:image/png;base64,{{ qr_code }}" alt="USDT Address QR Code" class="img-fluid mb-3">
                     <p class="card-text">USDT Address: {{ usdt_address }}</p>
                     <p class="card-text">Amount: ${{ amount | format_float}} USDT</p>
-                    <div class="alert alert-warning" role="alert">
-                        Please do not refresh the page. You will lose your QR code, and it is impossible to recover it
-                        again.
-                        Please ensure network is TRON, we are not responsible for any payments sent to the wrong address/network.
+                    <div>
+                        <a href="{% url 'show_usdt_address' %}?paid" class="btn btn-primary">I have paid this!</a>
                     </div>
                 </div>
             </div>

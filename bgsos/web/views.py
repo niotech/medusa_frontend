@@ -383,6 +383,22 @@ def checkout_view(request):
 
 # you have to work on this
 def show_btc_address(request):
+
+    if 'paid' in request.GET:
+        del request.session['has_btc_payment']
+        del request.session['img_str']
+        del request.session['btc_address']
+        del request.session['btc_amount']
+        return redirect('cart_detail')
+
+    if request.session.get('has_btc_payment'):
+        img_str = request.session.get('img_str')
+        btc_address = request.session.get('btc_address')
+        btc_amount = request.session.get('btc_amount')
+        return render(request, 'order/show_btc_address.html',
+                  {'qr_code': img_str, 'btc_address': btc_address, 'amount': btc_amount})
+
+
     cart_id = request.session.get('cart_id')
     cart_details = get_cart_detail(cart_id)
     #print("Cart:", cart_details)
@@ -440,11 +456,31 @@ def show_btc_address(request):
 
     del request.session['cart_id']
 
+    request.session['has_btc_payment'] = True
+    request.session['img_str'] = img_str
+    request.session['btc_address'] = btc_address
+    request.session['btc_amount'] = btc_amount
+
     return render(request, 'order/show_btc_address.html',
                   {'qr_code': img_str, 'btc_address': btc_address, 'amount': btc_amount})
 
 
 def show_usdt_address(request):
+
+    if 'paid' in request.GET:
+        del request.session['has_usdt_payment']
+        del request.session['img_str']
+        del request.session['usdt_address']
+        del request.session['usdt_amount']
+        return redirect('cart_detail')
+
+    if request.session.get('has_usdt_payment'):
+        img_str = request.session.get('img_str')
+        usdt_address = request.session.get('usdt_address')
+        usdt_amount = request.session.get('usdt_amount')
+        return render(request, 'order/show_usdt_address.html',
+                  {'qr_code': img_str, 'usdt_address': usdt_address, 'amount': usdt_amount})
+
     cart_id = request.session.get('cart_id')
     cart_details = get_cart_detail(cart_id)
 
@@ -517,11 +553,31 @@ def show_usdt_address(request):
 
     del request.session['cart_id']
 
+    request.session['has_usdt_payment'] = True
+    request.session['img_str'] = img_str
+    request.session['usdt_address'] = usdt_address
+    request.session['usdt_amount'] = usdt_amount
+
     return render(request, 'order/show_usdt_address.html',
                   {'qr_code': img_str, 'usdt_address': usdt_address, 'amount': usdt_amount})
 
 
 def show_xmr_address(request):
+
+    if 'paid' in request.GET:
+        del request.session['has_xmr_payment']
+        del request.session['img_str']
+        del request.session['xmr_address']
+        del request.session['xmr_amount']
+        return redirect('cart_detail')
+
+    if request.session.get('has_xmr_payment'):
+        img_str = request.session.get('img_str')
+        xmr_address = request.session.get('xmr_address')
+        xmr_amount = request.session.get('xmr_amount')
+        return render(request, 'order/show_xmr_address.html',
+                  {'qr_code': img_str, 'xmr_address': xmr_address, 'amount': xmr_amount})
+
     cart_id = request.session.get('cart_id')
     cart_details = get_cart_detail(cart_id)
 
@@ -568,6 +624,11 @@ def show_xmr_address(request):
     #print('Cart Complete', cart_complete.json())
 
     del request.session['cart_id']
+
+    request.session['has_xmr_payment'] = True
+    request.session['img_str'] = img_str
+    request.session['xmr_address'] = xmr_address
+    request.session['xmr_amount'] = xmr_amount
 
     return render(request, 'order/show_xmr_address.html',
                   {'qr_code': img_str, 'xmr_address': xmr_address, 'amount': xmr_amount})

@@ -18,9 +18,8 @@ XMR Payment Address
                     <img src="data:image/png;base64,{{ qr_code }}" alt="XMR Address QR Code" class="img-fluid mb-3">
                     <p class="card-text">XMR Address: {{ xmr_address }}</p>
                     <p class="card-text">Amount: {{ amount }} XMR</p>
-                    <div class="alert alert-warning" role="alert">
-                        Please do not refresh the page. You will lose your QR code, and it is impossible to recover it
-                        again.
+                    <div>
+                        <a href="{% url 'show_xmr_address' %}?paid" class="btn btn-primary">I have paid this!</a>
                     </div>
                 </div>
             </div>
