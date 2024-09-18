@@ -1,4 +1,5 @@
 from django.db import models
+from tinymce import models as tinymce_models
 
 
 class SiteSettings(models.Model):
@@ -44,6 +45,9 @@ class SiteSettings(models.Model):
     instagram = models.URLField(max_length=200, blank=True, null=True)
     facebook = models.URLField(max_length=200, blank=True, null=True)
 
+    # custom page content
+    loyalty_progam_overview_content = models.ForeignKey('Page', on_delete=models.CASCADE, blank=True, null=True)
+
     # other
     xmr_fixed_address = models.CharField(max_length=100, blank=True, null=True)
     
@@ -60,7 +64,7 @@ class SiteSettings(models.Model):
 class Page(models.Model):
     title = models.CharField(max_length=255)
     slug = models.SlugField(unique=True, help_text="Unique URL for this page")
-    content = models.TextField()
+    content = tinymce_models.HTMLField()
 
     def __str__(self):
         return self.title

@@ -56,6 +56,12 @@ class SiteSettingsAdmin(admin.ModelAdmin):
             },
         ),
         (
+            'Custom Page Content',
+            {
+                'fields': ['loyalty_progam_overview_content']
+            },
+        ),
+        (
             'Other',
             {
                 'fields': ['xmr_fixed_address']

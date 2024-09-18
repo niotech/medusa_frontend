@@ -108,7 +108,9 @@
         </div>
       </div>
 
-
+      {% if site_settings.loyalty_progam_overview_content %}
+          {{ site_settings.loyalty_progam_overview_content.content | safe }}
+      {% else %}
       <h2>Loyalty Program Overview</h2>
 
     <h3>What’s a loyalty program?</h3>
@@ -137,6 +139,9 @@
 
     <h3>Must I sign up to join this program?</h3>
     <p>Yes, you must sign up. While we understand that some customers prefer to order as guests to maintain anonymity, we need a reference to trace your order volume. Therefore, becoming a member is essential.</p>
+      {% endif %}
+
+
 
 
 

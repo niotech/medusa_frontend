@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.conf.urls.static import static
-from django.urls import path
+from django.urls import path, include
 from . import views
 
 urlpatterns = [
@@ -46,6 +46,8 @@ urlpatterns = [
     path('customer/logout', views.customer_logout, name='customer_logout'),
     path('customer/change_password', views.change_password, name='change_customer_password'),
     path('customer/orders', views.customer_orders, name='customer_orders'),
+
+    path('tinymce/', include('tinymce.urls')),
 
     # Contact page
     #path('contact/', views.ContactPageView.as_view(), name='contact_page'),
