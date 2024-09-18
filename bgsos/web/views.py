@@ -515,7 +515,7 @@ def show_usdt_address(request):
     img_str = base64.b64encode(buffered.getvalue()).decode()
 
 
-    request.session['cart_id'] = ''
+    del request.session['cart_id']
 
     return render(request, 'order/show_usdt_address.html',
                   {'qr_code': img_str, 'usdt_address': usdt_address, 'amount': usdt_amount})
@@ -567,7 +567,7 @@ def show_xmr_address(request):
 
     #print('Cart Complete', cart_complete.json())
 
-    request.session['cart_id'] = ''
+    del request.session['cart_id']
 
     return render(request, 'order/show_xmr_address.html',
                   {'qr_code': img_str, 'xmr_address': xmr_address, 'amount': xmr_amount})
