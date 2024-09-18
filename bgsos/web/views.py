@@ -438,7 +438,7 @@ def show_btc_address(request):
 
     #print('Cart Complete', cart_complete.json())
 
-    request.session['cart_id'] = ''
+    del request.session['cart_id']
 
     return render(request, 'order/show_btc_address.html',
                   {'qr_code': img_str, 'btc_address': btc_address, 'amount': btc_amount})
