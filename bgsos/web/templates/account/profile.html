@@ -110,35 +110,6 @@
 
       {% if site_settings.loyalty_progam_overview_content %}
           {{ site_settings.loyalty_progam_overview_content.content | safe }}
-      {% else %}
-      <h2>Loyalty Program Overview</h2>
-
-    <h3>What’s a loyalty program?</h3>
-    <p>The applying point system to reward our customers for choosing us as your vendor. Loyalty levels will be determined by points you earn in the previous year and it will be reset every year.
-      Each level has different privileges. They can be either discounts or some exclusive services. Please see above for the details.</p>
-
-    <h3>How can I earn points?</h3>
-    <p>There are three ways to earn points:</p>
-    <ul>
-        <li><strong>Purchasing from our Telegram shop:</strong> 1% of your purchases will be added to your points.</li>
-        <li><strong>Referring our Telegram shop to a friend:</strong> 5% of your friend's total {{ site_settings.currency_code|upper }} expenditure will be converted and added to your points.</li>
-        <li><strong>Referring our Telegram Channel to a friend:</strong> 1 point will be added to your points.</li>
-    </ul>
-
-    <h3>How long are my points valid for?</h3>
-    <p>Points are valid for use until 31st December of each year. The remaining points will be used to determine your level in the following year.</p>
-
-    <h3>Can I use my points?</h3>
-    <p>Yes, you can use your points as {{ site_settings.currency_code|upper }} on your purchases. However, please note that your loyalty level and privileges for the following year are determined by the remaining points you have at the end of the year.</p>
-
-    <h3>Can I cash out my points?</h3>
-    <p>No, you cannot cash out your points.</p>
-
-    <h3>How do I use my points?</h3>
-    <p>We are currently working on automating this process. Please contact our friendly staff on Telegram, via @Telegram, to specify how many points you would like to use.</p>
-
-    <h3>Must I sign up to join this program?</h3>
-    <p>Yes, you must sign up. While we understand that some customers prefer to order as guests to maintain anonymity, we need a reference to trace your order volume. Therefore, becoming a member is essential.</p>
       {% endif %}
 
 
