@@ -32,7 +32,7 @@ timeout = urllib3.util.Timeout(connect=5.0, read=10.0)
 
 # Adding retry strategy
 retry = Retry(
-    total=0,
+    total=3,
     read=3,
     connect=3,
     backoff_factor=1,
