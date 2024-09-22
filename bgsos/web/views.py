@@ -116,9 +116,9 @@ def add_to_cart_view(request, variant_id=None, qty=1):
             return render(request, 'general/error.html', {'message': f'Failed to create cart: {str(e)}'})
 
     try:
-        # reset qr payment
-        for method in ['btc', 'usdt', 'xmr']:
-            remove_qr_payment(method, request)
+        # reset qr payment if new
+        # for method in ['btc', 'usdt', 'xmr']:
+        #     remove_qr_payment(method, request)
         add_to_cart(cart_id, variant_id, qty)
         return redirect('cart_detail')
     except Exception as e:
