@@ -111,10 +111,14 @@ def add_to_cart_view(request, variant_id=None, qty=1):
             cart = create_cart(region_id)
             cart_id = cart['id']
             request.session['cart_id'] = cart_id
+
         except Exception as e:
             return render(request, 'general/error.html', {'message': f'Failed to create cart: {str(e)}'})
 
     try:
+        # reset qr payment
+        for method in ['btc', 'usdt', 'xmr']:
+            remove_qr_payment(method, request)
         add_to_cart(cart_id, variant_id, qty)
         return redirect('cart_detail')
     except Exception as e:
@@ -151,7 +155,7 @@ def create_cart_view(request):
             cart = create_cart()
             cart_id = cart['id']
             request.session['cart_id'] = cart_id
-            return redirect('cart_detail_view')
+            return redirect('cart_detail')
         except Exception as e:
             return render(request, 'general/error.html', {'message': f'Failed to create cart: {str(e)}'})
 
@@ -382,13 +386,24 @@ def checkout_view(request):
 
 
 # you have to work on this
-def show_btc_address(request):
-
-    if 'paid' in request.GET:
-        del request.session['has_btc_payment']
+def remove_qr_payment(method, request):
+    if 'cart_id' in request.session:
+        del request.session['cart_id']
+    if f'has_{method}_payment' in request.session:
+        del request.session[f'has_{method}_payment']
+    if 'img_str' in request.session:
         del request.session['img_str']
-        del request.session['btc_address']
-        del request.session['btc_amount']
+    if f'{method}_address' in request.session:
+        del request.session[f'{method}_address']
+    if f'{method}_amount' in request.session:
+        del request.session[f'{method}_amount']
+    if f'has_{method}_payment' in request.session:
+        del request.session[f'has_{method}_payment']
+
+
+def show_btc_address(request):
+    if 'paid' in request.GET:
+        remove_qr_payment('btc', request)
         return redirect('cart_detail')
 
     if request.session.get('has_btc_payment'):
@@ -418,6 +433,9 @@ def show_btc_address(request):
     cart_complete = confirm_order(cart_id)
     #print("Cart ID:", cart_id)
     #print("Cart complete:", cart_complete.json())
+
+    if not cart_complete.json().get('data'):
+        return redirect('cart_detail')
 
     params['metadata'] = {
         'orderId': cart_complete.json().get('data').get('id')
@@ -468,10 +486,7 @@ def show_btc_address(request):
 def show_usdt_address(request):
 
     if 'paid' in request.GET:
-        del request.session['has_usdt_payment']
-        del request.session['img_str']
-        del request.session['usdt_address']
-        del request.session['usdt_amount']
+        remove_qr_payment('usdt', request)
         return redirect('cart_detail')
 
     if request.session.get('has_usdt_payment'):
@@ -535,6 +550,9 @@ def show_usdt_address(request):
 
     usdt_address = response.json().get('pay_address')
 
+    # if not usdt_address:
+    #     return redirect('cart_detail')
+
     # Generate QR code
     qr = qrcode.QRCode(
         version=1,
@@ -565,10 +583,7 @@ def show_usdt_address(request):
 def show_xmr_address(request):
 
     if 'paid' in request.GET:
-        del request.session['has_xmr_payment']
-        del request.session['img_str']
-        del request.session['xmr_address']
-        del request.session['xmr_amount']
+        remove_qr_payment('xmr', request)
         return redirect('cart_detail')
 
     if request.session.get('has_xmr_payment'):
