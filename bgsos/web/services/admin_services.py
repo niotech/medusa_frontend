@@ -46,10 +46,9 @@ class MedusaAdminAPI():
         # Comment out to disable proxy
         self.session.proxies.update(self.proxies)
 
-        self.auth_token = ''
+        self.auth_token = settings.MEDUSA_ACCESS_TOKEN
         self.incomplete_orders = []
 
-        self.login_jwt()
 
     def login_jwt(self):
         headers = {
