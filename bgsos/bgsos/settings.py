@@ -68,6 +68,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'whitenoise.runserver_nostatic',
     
+    'django_celery_beat',
     'tinymce',
 
     'web',
@@ -220,4 +221,21 @@ TINYMCE_DEFAULT_CONFIG = {
     "a11ycheck ltr rtl | showcomments addcomment code",
     "custom_undo_redo_levels": 10,
     "language": "en_US",  # To force a specific language instead of the Django current language.
+}
+
+
+CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_EXPIRES = 3600
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers.DatabaseScheduler'
+
+from celery.schedules import crontab
+import web.tasks
+
+CELERY_BEAT_SCHEDULE = {
+    "update_btc_payment_status": {
+        "task": "web.tasks.update_btc_payment_status",
+        "schedule": crontab(minute="*/1"),
+    },
 }
