@@ -239,3 +239,6 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": crontab(minute="*/1"),
     },
 }
+
+MEDUSA_ADMIN_EMAIL = os.getenv('MEDUSA_ADMIN_EMAIL')
+MEDUSA_ADMIN_PASSWORD = os.getenv('MEDUSA_ADMIN_PASSWORD')
