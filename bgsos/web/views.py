@@ -117,8 +117,8 @@ def add_to_cart_view(request, variant_id=None, qty=1):
 
     try:
         # reset qr payment if new
-        # for method in ['btc', 'usdt', 'xmr']:
-        #     remove_qr_payment(method, request)
+        for method in ['btc', 'usdt', 'xmr']:
+            remove_qr_payment(method, request, False)
         add_to_cart(cart_id, variant_id, qty)
         return redirect('cart_detail')
     except Exception as e:
@@ -386,8 +386,8 @@ def checkout_view(request):
 
 
 # you have to work on this
-def remove_qr_payment(method, request):
-    if 'cart_id' in request.session:
+def remove_qr_payment(method, request, remove_card_id=True):
+    if remove_card_id and 'cart_id' in request.session:
         del request.session['cart_id']
     if f'has_{method}_payment' in request.session:
         del request.session[f'has_{method}_payment']
