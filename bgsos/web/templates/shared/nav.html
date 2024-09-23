@@ -1,4 +1,4 @@
-        <nav class="colorlib-nav" role="navigation">
+            <nav class="colorlib-nav" role="navigation">
             <div class="top-menu">
                 <div class="container">
                     <div class="row">
@@ -31,10 +31,10 @@
                                 {% if request.session.auth_token %}
                                 <li class="cart"><a href="{% url 'customer_logout' %}"><i class="icon-user"></i> Logout</a></li>
                                 <li class="cart"><a href="{% url 'customer_profile' %}"><i class="icon-user"></i> Profile</a></li>
+                                <li class="cart"><a href="{% url 'customer_orders' %}"><i class="icon-clipboard3"></i> Orders</a></li>
                                 {% else %}
                                 <li class="cart"><a href="{% url 'customer_signin' %}"><i class="icon-user"></i> Login</a></li>
                                 {% endif %}
-                                <li class="cart"><a href="{% url 'customer_orders' %}"><i class="icon-clipboard3"></i> Orders</a></li>
                                 <li class="cart"><a href="{% url 'cart_detail' %}"><i class="icon-shopping-cart"></i> Cart</a></li>
                             </ul>
                         </div>
