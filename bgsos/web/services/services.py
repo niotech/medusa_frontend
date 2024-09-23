@@ -10,7 +10,7 @@ from django.conf import settings  # Import settings from Django
 backendUrl = settings.BACKEND_URL
 levelsUrl = settings.LEVELS_URL
 auth_token_level = settings.LEVELS_API_KEY
-publishableApiKey = settings.PUBLISHABLE_API_KEY
+publishableApiKey = settings.MEDUSA_API_KEY
 regionId = settings.REGION_ID
 btc_url = settings.BTC_URL
 btc_store_id = settings.BTC_STORE_ID

@@ -29,7 +29,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Environment variables
 BACKEND_URL = os.getenv('BACKEND_URL')
-PUBLISHABLE_API_KEY = os.getenv('PUBLISHABLE_API_KEY')
+MEDUSA_API_KEY = os.getenv('MEDUSA_API_KEY')
 REGION_ID = os.getenv('REGION_ID')
 USDT_URL = os.getenv('USDT_URL')
 USDT_API_KEY = os.getenv('USDT_API_KEY')
@@ -240,4 +240,4 @@ CELERY_BEAT_SCHEDULE = {
     },
 }
 
-MEDUSA_ADMIN_TOKEN = os.getenv('MEDUSA_ADMIN_TOKEN')
+MEDUSA_ADMIN_KEY = os.getenv('MEDUSA_ADMIN_KEY')

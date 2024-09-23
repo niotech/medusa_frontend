@@ -46,7 +46,7 @@ def cart_id(request):
 ## .env
 ```
 BACKEND_URL=""
-PUBLISHABLE_API_KEY=""
+MEDUSA_API_KEY=""
 DEFAULT_REGION_ID=""
 ```
 
