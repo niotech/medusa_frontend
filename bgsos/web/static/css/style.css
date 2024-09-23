@@ -8562,7 +8562,7 @@ input[type="text"] {
     max-width: 50%; } }
 
 #colorlib-footer {
-  padding: 7em 0 0 0; 
+  padding: 4em 0 0 0;
   background-color: var(--f-clr-grey-100);
 }
 
