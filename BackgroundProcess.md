@@ -8,10 +8,10 @@
 
 ## Installing
 - Activate the virtual environment for this project
-- `pip install -r requiremetns.txt` this will install celery related packages (if not isntalled yet)
+- `pip install -r requirements.txt` this will install celery related packages (if not installed yet)
 
 ## Setup
-- Run `./manage.py migrate`, this will migrate requirement for celery beat
+- Run `./manage.py migrate`, this will migrate requirements for celery beat
 
 
 ## Running
