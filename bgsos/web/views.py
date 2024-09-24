@@ -60,11 +60,15 @@ def set_cart_flow(request, current_page='cart'):
 
     if current_page in request.session['cart_flow'] and not request.session['cart_flow'][current_page]:
         request.session['cart_flow'][current_page] = True
+        request.session.save()
 
+    if current_page != 'qr_page' and  request.session['cart_flow']['payment_method'] and request.session['cart_flow']['qr_page'] and 'selected_payment_method' in request.session:
+        return True, f'show_{request.session["selected_payment_method"]}_address'
 
-def go_to_qr_payment():
-    if request.session['cart_flow']['payment_method'] and 'selected_payment_method' in request.session:
-        return redirect(f'show_{request.session["selected_payment_method"]}_address')
+    if current_page != 'payment_method' and request.session['cart_flow']['shipping_method'] and 'selected_option_id' in request.session and request.session['cart_flow']['payment_method']:
+        return True, 'show_payment_options'
+
+    return False, ''
 
 ##
 def index_view(request):    
@@ -199,15 +203,9 @@ def create_cart_view(request):
 #         return render(request, 'general/error.html', {'message': 'Failed to remove from cart.'})
 
 def cart_detail_view(request):
-    set_cart_flow(request, 'cart')  # ['cart', 'checkout', 'shipping_method', 'payment_method', 'qr_page']
-
-
-    # TODO: check the other cart processing page done or not
-    if request.session['cart_flow']['shipping_method'] and request.session['cart_flow']['payment_method'] and 'selected_option_id' in request.session:
-        return redirect('show_payment_options')
-
-    if request.session['cart_flow']['payment_method'] and 'selected_payment_method' not in request.session:
-        return redirect('show_payment_options')
+    redir, redir_url = set_cart_flow(request, 'cart')  # ['cart', 'checkout', 'shipping_method', 'payment_method', 'qr_page']
+    if redir:
+        return redirect(redir_url)
 
     cart_id = request.session.get('cart_id')
     #print(cart_id)
@@ -387,11 +385,9 @@ def select_shipping_method_view(request, cart_id):
 
 
 def checkout_view(request):
-    set_cart_flow(request, 'checkout')  # ['cart', 'checkout', 'shipping_method', 'payment_method', 'qr_page']
-
-    # TODO: check the other cart processing page done or not
-    if request.session['cart_flow']['payment_method'] and 'selected_payment_method' not in request.session:
-        return redirect('show_payment_options')
+    redir, redir_url = set_cart_flow(request, 'checkout')  # ['cart', 'checkout', 'shipping_method', 'payment_method', 'qr_page']
+    if redir:
+        return redirect(redir_url)
 
     cart_id = request.session.get('cart_id')
     
@@ -467,11 +463,11 @@ def clear_cart_data(method, request, remove_cart_id=True):
     if 'selected_payment_method' in request.session:
         del request.session['selected_payment_method']
 
+    request.session.save()
+
 
 def show_btc_address(request):
     set_cart_flow(request, 'qr_page')  # ['cart', 'checkout', 'shipping_method', 'payment_method', 'qr_page']
-
-    # TODO: check the other cart processing page done or not
 
     if 'paid' in request.GET:
         clear_cart_data('btc', request)
@@ -558,8 +554,6 @@ def show_btc_address(request):
 
 def show_usdt_address(request):
     set_cart_flow(request, 'qr_page')  # ['cart', 'checkout', 'shipping_method', 'payment_method', 'qr_page']
-
-    # TODO: check the other cart processing page done or not
 
     if 'paid' in request.GET:
         clear_cart_data('usdt', request)
@@ -659,8 +653,6 @@ def show_usdt_address(request):
 def show_xmr_address(request):
     set_cart_flow(request, 'qr_page')  # ['cart', 'checkout', 'shipping_method', 'payment_method', 'qr_page']
 
-    # TODO: check the other cart processing page done or not
-
     if 'paid' in request.GET:
         clear_cart_data('xmr', request)
         return redirect('cart_detail')
@@ -730,9 +722,10 @@ def show_xmr_address(request):
 
 
 def show_payment_options(request):
-    set_cart_flow(request, 'payment_method')  # ['cart', 'checkout', 'shipping_method', 'payment_method', 'qr_page']
+    redir, redir_url = set_cart_flow(request, 'payment_method')  # ['cart', 'checkout', 'shipping_method', 'payment_method', 'qr_page']
+    if redir:
+        return redirect(redir_url)
 
-    # TODO: check the other cart processing page done or not
 
     if request.method == 'POST':
         payment_method = request.POST.get('payment_method')
@@ -750,11 +743,9 @@ def show_payment_options(request):
 
 
 def shipping_methods(request):
-    set_cart_flow(request, 'shipping_method')  # ['cart', 'checkout', 'shipping_method', 'payment_method', 'qr_page']
-
-    # TODO: check the other cart processing page done or not
-    if request.session['cart_flow']['payment_method'] and 'selected_payment_method' not in request.session:
-        return redirect('show_payment_options')
+    redir, redir_url = set_cart_flow(request, 'shipping_method')  # ['cart', 'checkout', 'shipping_method', 'payment_method', 'qr_page']
+    if redir:
+        return redirect(redir_url)
 
     if request.method == 'POST':
         cart_id = request.session.get('cart_id')
@@ -767,7 +758,7 @@ def shipping_methods(request):
             confirm_order(cart_id)
             clear_cart_data_all(request)
 
-
+            print(str(e))
             return render(request, 'general/error.html',
                           {'message': f'Failed to select shipping method.'})
 
