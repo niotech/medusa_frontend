@@ -48,6 +48,24 @@ from web.utils import generate_random_name  # Import the function
 from django.views.generic import DetailView, TemplateView
 
 
+def set_cart_flow(request, current_page='cart'):
+    if 'cart_flow' not in request.session:
+        request.session['cart_flow'] = {
+            "cart": False,
+            "checkout": False,
+            "shipping_method": False,
+            "payment_method": False,
+            "qr_page": False
+        }
+
+    if current_page in request.session['cart_flow'] and not request.session['cart_flow'][current_page]:
+        request.session['cart_flow'][current_page] = True
+
+
+def go_to_qr_payment():
+    if request.session['cart_flow']['payment_method'] and 'selected_payment_method' in request.session:
+        return redirect(f'show_{request.session["selected_payment_method"]}_address')
+
 ##
 def index_view(request):    
     return render(request, 'page/index.html', {})
@@ -86,7 +104,7 @@ def product_detail_view(request, product_id):
         # print(product.get('variants'))
         return render(request, 'product/product_detail.html', {'product': product})
     else:
-        return render(request, 'general/error.html', {'message': 'Failed to load product'})
+        return render(request, 'general/error.html', {'message': 'Failed to load product.'})
 
 
 def add_to_cart_view(request, variant_id=None, qty=1):
@@ -113,7 +131,7 @@ def add_to_cart_view(request, variant_id=None, qty=1):
             request.session['cart_id'] = cart_id
 
         except Exception as e:
-            return render(request, 'general/error.html', {'message': f'Failed to create cart: {str(e)}'})
+            return render(request, 'general/error.html', {'message': f'Failed to create cart'})
 
     try:
         # reset qr payment if new
@@ -122,7 +140,7 @@ def add_to_cart_view(request, variant_id=None, qty=1):
         add_to_cart(cart_id, variant_id, qty)
         return redirect('cart_detail')
     except Exception as e:
-        return render(request, 'general/error.html', {'message': f'Failed to add item to cart: {str(e)}'})
+        return render(request, 'general/error.html', {'message': f'Failed to add item to cart'})
 
 
 # def add_to_cart_view(request, variant_id, qty):
@@ -135,13 +153,13 @@ def add_to_cart_view(request, variant_id=None, qty=1):
 #             cart_id = cart['id']
 #             request.session['cart_id'] = cart_id
 #         except Exception as e:
-#             return render(request, 'general/error.html', {'message': f'Failed to create cart: {str(e)}'})
+#             return render(request, 'general/error.html', {'message': f'Failed to create cart.'})
 #
 #     try:
 #         add_to_cart(cart_id, variant_id, qty)
 #         return redirect('cart_detail')
 #     except Exception as e:
-#         return render(request, 'general/error.html', {'message': f'Failed to add item to cart: {str(e)}'})
+#         return render(request, 'general/error.html', {'message': f'Failed to add item to cart.'})
 #
 
 ##
@@ -157,13 +175,13 @@ def create_cart_view(request):
             request.session['cart_id'] = cart_id
             return redirect('cart_detail')
         except Exception as e:
-            return render(request, 'general/error.html', {'message': f'Failed to create cart: {str(e)}'})
+            return render(request, 'general/error.html', {'message': f'Failed to create cart.'})
 
     try:
         cart = get_cart_detail(cart_id)
         return render(request, 'product/cart_detail.html', {'cart': cart})
     except Exception as e:
-        return render(request, 'general/error.html', {'message': f'Failed to retrieve cart details: {str(e)}'})
+        return render(request, 'general/error.html', {'message': f'Failed to retrieve cart details.'})
 
 
 # def add_to_cart_view(request, cart_id, variant_id, qty):
@@ -171,16 +189,26 @@ def create_cart_view(request):
 #     if response.status_code == 200:
 #         return redirect('cart_detail', cart_id=cart_id)
 #     else:
-#         return render(request, 'general/error.html', {'message': 'Failed to add to cart'})
+#         return render(request, 'general/error.html', {'message': 'Failed to add to cart.'})
 
 # def remove_from_cart_view(request, cart_id, item_id):
 #     response = remove_from_cart(cart_id, item_id)
 #     if response.status_code == 200:
 #         return redirect('cart_detail', cart_id=cart_id)
 #     else:
-#         return render(request, 'general/error.html', {'message': 'Failed to remove from cart'})
+#         return render(request, 'general/error.html', {'message': 'Failed to remove from cart.'})
 
 def cart_detail_view(request):
+    set_cart_flow(request, 'cart')  # ['cart', 'checkout', 'shipping_method', 'payment_method', 'qr_page']
+
+
+    # TODO: check the other cart processing page done or not
+    if request.session['cart_flow']['shipping_method'] and request.session['cart_flow']['payment_method'] and 'selected_option_id' in request.session:
+        return redirect('show_payment_options')
+
+    if request.session['cart_flow']['payment_method'] and 'selected_payment_method' not in request.session:
+        return redirect('show_payment_options')
+
     cart_id = request.session.get('cart_id')
     #print(cart_id)
     if not cart_id:
@@ -195,13 +223,21 @@ def cart_detail_view(request):
         cart_response = get_cart_detail(cart_id)
         if cart_response.status_code == 200:
             cart = cart_response.json()['cart']  # Convert response to JSON and extract the 'cart' key
+
+            # if shipping ammount exist, remove it from total
+
             return render(request, 'order/cart_detail.html', {'cart': cart})
         else:
+            # force cart complete
+            confirm_order(cart_id)
+            clear_cart_data_all(request)
+
+
             return render(request, 'general/error.html',
                           {'message': f'Failed to retrieve cart details. Status code: {cart_response.status_code}'})
 
     except Exception as e:
-        return render(request, 'general/error.html', {'message': f'Failed to retrieve cart details: {str(e)}'})
+        return render(request, 'general/error.html', {'message': f'Failed to retrieve cart details.'})
 
 
 """ def update_cart_item_view(request, item_id):
@@ -212,7 +248,7 @@ def cart_detail_view(request):
         update_line_item(cart_id, item_id)
         return redirect('cart_detail')
     except Exception as e:
-        return render(request, 'general/error.html', {'message': f'Failed to remove item from cart: {str(e)}'})
+        return render(request, 'general/error.html', {'message': f'Failed to remove item from cart.'})
      """
 
 
@@ -227,7 +263,7 @@ def update_cart_item_view(request, item_id):
             update_line_item(cart_id, item_id, int(new_quantity))
             return redirect('cart_detail')
         except Exception as e:
-            return render(request, 'general/error.html', {'message': f'Failed to update item quantity: {str(e)}'})
+            return render(request, 'general/error.html', {'message': f'Failed to update item quantity.'})
 
 
 def remove_from_cart_view(request, item_id):
@@ -238,7 +274,7 @@ def remove_from_cart_view(request, item_id):
         remove_from_cart(cart_id, item_id)
         return redirect('cart_detail')
     except Exception as e:
-        return render(request, 'general/error.html', {'message': f'Failed to remove item from cart: {str(e)}'})
+        return render(request, 'general/error.html', {'message': f'Failed to remove item from cart.'})
 
 
 ## WORKS
@@ -299,7 +335,7 @@ def confirm_order_view(request):
         message_json = json.loads(response.content.decode('utf-8'))
         # error_message = response.get('error', 'Failed to confirm order')
         error_message = f"{message_json['type']}: {message_json['message']}"
-        return render(request, 'general/error.html', {'message': error_message})
+        return render(request, 'general/error.html', {'message': 'Something wrong when confirm your order.'})
 
 
 def update_cart_view(request, cart_id):
@@ -333,7 +369,7 @@ def update_cart_view(request, cart_id):
 #
 #             return redirect('cart_detail')
 #         except Exception as e:
-#             return render(request, 'general/error.html', {'message': f'Failed to update item quantity: {str(e)}'})
+#             return render(request, 'general/error.html', {'message': f'Failed to update item quantity.'})
 
 
 def select_shipping_method_view(request, cart_id):
@@ -351,6 +387,12 @@ def select_shipping_method_view(request, cart_id):
 
 
 def checkout_view(request):
+    set_cart_flow(request, 'checkout')  # ['cart', 'checkout', 'shipping_method', 'payment_method', 'qr_page']
+
+    # TODO: check the other cart processing page done or not
+    if request.session['cart_flow']['payment_method'] and 'selected_payment_method' not in request.session:
+        return redirect('show_payment_options')
+
     cart_id = request.session.get('cart_id')
     
     if request.method == 'POST':
@@ -380,9 +422,19 @@ def checkout_view(request):
                 return redirect('shipping_methods')
             return redirect('shipping_methods')
         except Exception as e:
-            return render(request, 'general/error.html', {'message': f'Failed to update shipping details: {str(e)}'})
+            # force cart complete
+            confirm_order(cart_id)
+            clear_cart_data_all(request)
+
+
+            return render(request, 'general/error.html', {'message': f'Failed to update shipping details'})
     
     return render(request, 'order/checkout.html')
+
+
+def clear_cart_data_all(request, remove_cart_id=True):
+    for method in ['btc', 'usdt', 'xmr']:
+        clear_cart_data(method, request, remove_cart_id)
 
 
 # you have to work on this
@@ -409,8 +461,18 @@ def clear_cart_data(method, request, remove_cart_id=True):
     if f'has_{method}_payment' in request.session:
         del request.session[f'has_{method}_payment']
 
+    if 'cart_flow' in request.session:
+        del request.session['cart_flow']
+
+    if 'selected_payment_method' in request.session:
+        del request.session['selected_payment_method']
+
 
 def show_btc_address(request):
+    set_cart_flow(request, 'qr_page')  # ['cart', 'checkout', 'shipping_method', 'payment_method', 'qr_page']
+
+    # TODO: check the other cart processing page done or not
+
     if 'paid' in request.GET:
         clear_cart_data('btc', request)
         return redirect('cart_detail')
@@ -425,7 +487,7 @@ def show_btc_address(request):
 
     cart_id = request.session.get('cart_id')
     cart_details = get_cart_detail(cart_id)
-    #print("Cart:", cart_details)
+    # print("Cart:", cart_details)
     # create and select payment session
     created_payment_session = create_payment_session(cart_id)
 
@@ -433,6 +495,8 @@ def show_btc_address(request):
         'amount': cart_details.json().get('cart').get('total') / 100,
         'currency': cart_details.json().get('cart').get('region').get('currency_code')
     }
+
+    print(f"Total: {params['amount']}")
 
     if created_payment_session.status_code == 200:
         selected_payment_session = select_payment_session(cart_id, 'manual')
@@ -493,6 +557,9 @@ def show_btc_address(request):
 
 
 def show_usdt_address(request):
+    set_cart_flow(request, 'qr_page')  # ['cart', 'checkout', 'shipping_method', 'payment_method', 'qr_page']
+
+    # TODO: check the other cart processing page done or not
 
     if 'paid' in request.GET:
         clear_cart_data('usdt', request)
@@ -590,6 +657,9 @@ def show_usdt_address(request):
 
 
 def show_xmr_address(request):
+    set_cart_flow(request, 'qr_page')  # ['cart', 'checkout', 'shipping_method', 'payment_method', 'qr_page']
+
+    # TODO: check the other cart processing page done or not
 
     if 'paid' in request.GET:
         clear_cart_data('xmr', request)
@@ -660,28 +730,61 @@ def show_xmr_address(request):
 
 
 def show_payment_options(request):
+    set_cart_flow(request, 'payment_method')  # ['cart', 'checkout', 'shipping_method', 'payment_method', 'qr_page']
+
+    # TODO: check the other cart processing page done or not
+
     if request.method == 'POST':
         payment_method = request.POST.get('payment_method')
         if payment_method == 'btc':
+            request.session['selected_payment_method'] = 'btc'
             return redirect('show_btc_address')
         elif payment_method == 'usdt':
+            request.session['selected_payment_method'] = 'usdt'
             return redirect('show_usdt_address')
         elif payment_method == 'xmr':
+            request.session['selected_payment_method'] = 'xmr'
             return redirect('show_xmr_address')
 
     return render(request, 'order/show_payment_options.html')
 
 
 def shipping_methods(request):
+    set_cart_flow(request, 'shipping_method')  # ['cart', 'checkout', 'shipping_method', 'payment_method', 'qr_page']
+
+    # TODO: check the other cart processing page done or not
+    if request.session['cart_flow']['payment_method'] and 'selected_payment_method' not in request.session:
+        return redirect('show_payment_options')
+
     if request.method == 'POST':
         cart_id = request.session.get('cart_id')
-        selected_option_id = request.POST.get('option_id')
-        request.session['selected_option_id'] = selected_option_id
-        selected_shipping_method = shipping_method(cart_id, selected_option_id)
+        try:
+            selected_option_id = request.POST.get('option_id')
+            request.session['selected_option_id'] = selected_option_id
+            selected_shipping_method = shipping_method(cart_id, selected_option_id)
+        except Exception as e:
+            # force cart complete
+            confirm_order(cart_id)
+            clear_cart_data_all(request)
+
+
+            return render(request, 'general/error.html',
+                          {'message': f'Failed to select shipping method.'})
+
+        request.session['shipping_method_selected'] = True
         return redirect('show_payment_options')
 
     cart_id = request.session.get('cart_id')
-    available_shipping_methods = get_shipping_options(cart_id)
+    try:
+        available_shipping_methods = get_shipping_options(cart_id)
+    except Exception as e:
+        # force cart complete
+        confirm_order(cart_id)
+        clear_cart_data_all(request)
+
+
+        return render(request, 'general/error.html',
+                      {'message': f'Failed to get shipping method options.'})
     return render(request, 'order/shipping_method.html',
                   {'shipping_options': available_shipping_methods.json().get('shipping_options')})
 
@@ -691,7 +794,7 @@ def create_payment_session_view(request, cart_id):
     if response.status_code == 200:
         return redirect('cart_detail', cart_id=cart_id)
     else:
-        return render(request, 'general/general/error.html', {'message': 'Failed to create payment session'})
+        return render(request, 'general/general/error.html', {'message': 'Failed to create payment session.'})
 
 
 def select_payment_session_view(request, cart_id):
@@ -701,7 +804,7 @@ def select_payment_session_view(request, cart_id):
         if response.status_code == 200:
             return redirect('cart_detail', cart_id=cart_id)
         else:
-            return render(request, 'general/error.html', {'message': 'Failed to select payment session'})
+            return render(request, 'general/error.html', {'message': 'Failed to select payment session.'})
     else:
         # Assuming you have a way to get available payment providers
         payment_providers = [{"id": "provider_1", "name": "Provider 1"}, {"id": "provider_2", "name": "Provider 2"}]
