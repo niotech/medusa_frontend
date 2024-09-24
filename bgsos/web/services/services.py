@@ -235,7 +235,7 @@ def create_payment(params):
         "currency": params['currency'],
         "metadata": params.get('metadata', None)
     }
-    return requests.post(url, headers=headers, json=data)
+    return session.post(url, headers=headers, json=data)
 
 
 def get_invoice_details(invoice_id):
@@ -244,7 +244,7 @@ def get_invoice_details(invoice_id):
         "Authorization": f"token {btc_store_api}",
         "Content-Type": "application/json",
     }
-    return requests.get(url, headers=headers)
+    return session.get(url, headers=headers)
 
 
 def customer_login(email, password):
@@ -314,13 +314,13 @@ def get_customer_level(username):
         response = session.get(f'{levelsUrl}/api/public/customerdetail?username={username}', headers=headers)
         response.raise_for_status()  # Raises HTTPError for bad responses (4xx, 5xx)
         return response.json()  # Return the JSON data if the request is successful
-    except requests.ConnectionError:
+    except session.ConnectionError:
         # Handle connection errors like broken proxies, unreachable hosts
         print("Connection error occurred. Could not reach the customer details API.")
-    except requests.Timeout:
+    except session.Timeout:
         # Handle request timeout errors
         print("The request timed out while trying to reach the customer details API.")
-    except requests.RequestException as e:
+    except session.RequestException as e:
         # Generic exception handling for all other request-related issues
         print(f"An error occurred: {e}")
     

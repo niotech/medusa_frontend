@@ -95,7 +95,7 @@ class MedusaAdminAPI():
             "Authorization": f"token {self.btc_store_api}",
             "Content-Type": "application/json",
         }
-        response = requests.get(f'{self.btc_url}/api/v1/stores/{self.btc_store_id}/invoices?{param_orderId}status=Settled', headers=headers)
+        response = self.session.get(f'{self.btc_url}/api/v1/stores/{self.btc_store_id}/invoices?{param_orderId}status=Settled', headers=headers)
 
         if response.status_code == 200:
 
@@ -112,7 +112,7 @@ class MedusaAdminAPI():
                 orderId = settled_order['metadata']['orderId']
                 print(f'Processing Order Id = {orderId}')
                 # update medusa, payment_status = captured
-                response = session.post(f'{self.backendUrl}/admin/orders/{orderId}/capture', headers=headers)
+                response = self.session.post(f'{self.backendUrl}/admin/orders/{orderId}/capture', headers=headers)
                 if response.status_code == 200:
                     print(f'Order Id = {orderId} Payment Captured')
                 else:
