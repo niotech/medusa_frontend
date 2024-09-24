@@ -118,7 +118,7 @@ def add_to_cart_view(request, variant_id=None, qty=1):
     try:
         # reset qr payment if new
         for method in ['btc', 'usdt', 'xmr']:
-            remove_qr_payment(method, request, False)
+            clear_cart_data(method, request, False)
         add_to_cart(cart_id, variant_id, qty)
         return redirect('cart_detail')
     except Exception as e:
@@ -386,9 +386,18 @@ def checkout_view(request):
 
 
 # you have to work on this
-def remove_qr_payment(method, request, remove_card_id=True):
-    if remove_card_id and 'cart_id' in request.session:
+def clear_cart_data(method, request, remove_cart_id=True):
+    """
+        method: the payment method: btc, usdt, xmr
+        request: the origin request
+        remove_cart_id: if true it will remove cart_id from session, forcing new cart
+    """
+
+    if remove_cart_id and 'cart_id' in request.session:
         del request.session['cart_id']
+
+    if 'selected_option_id' in request.session:
+        del request.session['selected_option_id']
     if f'has_{method}_payment' in request.session:
         del request.session[f'has_{method}_payment']
     if 'img_str' in request.session:
@@ -403,7 +412,7 @@ def remove_qr_payment(method, request, remove_card_id=True):
 
 def show_btc_address(request):
     if 'paid' in request.GET:
-        remove_qr_payment('btc', request)
+        clear_cart_data('btc', request)
         return redirect('cart_detail')
 
     if request.session.get('has_btc_payment'):
@@ -486,7 +495,7 @@ def show_btc_address(request):
 def show_usdt_address(request):
 
     if 'paid' in request.GET:
-        remove_qr_payment('usdt', request)
+        clear_cart_data('usdt', request)
         return redirect('cart_detail')
 
     if request.session.get('has_usdt_payment'):
@@ -583,7 +592,7 @@ def show_usdt_address(request):
 def show_xmr_address(request):
 
     if 'paid' in request.GET:
-        remove_qr_payment('xmr', request)
+        clear_cart_data('xmr', request)
         return redirect('cart_detail')
 
     if request.session.get('has_xmr_payment'):
