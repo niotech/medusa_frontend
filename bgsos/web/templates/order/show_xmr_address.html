@@ -16,8 +16,8 @@ XMR Payment Address
                 </div>
                 <div class="card-body">
                     <img src="data:image/png;base64,{{ qr_code }}" alt="XMR Address QR Code" class="img-fluid mb-3">
-                    <p class="card-text">XMR Address: {{ xmr_address }}</p>
-                    <p class="card-text">Amount: {{ amount }} XMR</p>
+                    <h4 class="card-text">XMR Address: <strong>{{ xmr_address }}</strong></h4>
+                    <h4 class="card-text">Amount: <strong>{{ amount }} XMR</strong></h4>
                     <div>
                         <a href="{% url 'show_xmr_address' %}?paid" class="btn btn-primary">I have paid this!</a>
                     </div>

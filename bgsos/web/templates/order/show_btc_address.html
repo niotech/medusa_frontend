@@ -16,8 +16,8 @@ BTC Payment Address
                 </div>
                 <div class="card-body">
                     <img src="data:image/png;base64,{{ qr_code }}" alt="BTC Address QR Code" class="img-fluid mb-3">
-                    <p class="card-text">BTC Address: {{ btc_address }}</p>
-                    <p class="card-text">Amount: {{ amount }} BTC</p>
+                    <h4 class="card-text">BTC Address: <strong>{{ btc_address }}</strong></h4>
+                    <h4 class="card-text">Amount: <strong>{{ amount }} BTC</strong></h4>
                     <div>
                         <a href="{% url 'show_btc_address' %}?paid" class="btn btn-primary">I have paid this!</a>
                     </div>
