@@ -22,6 +22,9 @@ Error
                             <div class="page-wrap">
                                 <h1>Oops! Something went wrong.</h1>
                                 <p>We’re sorry, but there was an error on the website. Please try again later.</p>
+                                {% if message %}
+                                <p>Related error: {{ messsage }}
+                                {% endif %}
                             </div>
                         </div>
                     </div>
