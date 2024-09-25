@@ -1,6 +1,6 @@
 # In catalog/context_processors.py
 from web.services.services import get_collections
-from .models import SiteSettings
+from .models import SiteSettings, FooterNav
 
 def cart_id(request):
     return {'cart_id': request.session.get('cart_id')}
@@ -24,4 +24,10 @@ def site_settings(request):
     settings = SiteSettings.objects.last()
     return {
         'site_settings': settings
+    }
+
+
+def footer_nav_items(request):
+    return {
+        'footer_nav_items': FooterNav.objects.all()
     }

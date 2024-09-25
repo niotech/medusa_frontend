@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import SiteSettings, Page, Contact
+from .models import SiteSettings, Page, Contact, FooterNav
 
 
 class SiteSettingsAdmin(admin.ModelAdmin):
@@ -85,6 +85,14 @@ class ContactAdmin(admin.ModelAdmin):
     ordering = ('submitted_at',)  # Default ordering by submission date
 
 
+class FooterNavAdmin(admin.ModelAdmin):
+    list_display = ('title', 'get_url', 'display_order')
+    ordering = ('display_order',)
+    list_editable = ['display_order']
+
+
+
 # Register the models with the admin site
 admin.site.register(Page, PageAdmin)
 admin.site.register(Contact, ContactAdmin)
+admin.site.register(FooterNav, FooterNavAdmin)

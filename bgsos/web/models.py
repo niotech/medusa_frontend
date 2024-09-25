@@ -1,4 +1,5 @@
 from django.db import models
+from django.urls import reverse
 from tinymce import models as tinymce_models
 
 
@@ -61,10 +62,39 @@ class SiteSettings(models.Model):
         return "Site Settings"
 
 
+class FooterNav(models.Model):
+    title = models.CharField(max_length=50)
+    page = models.ForeignKey("Page", blank=True, null=True, on_delete=models.CASCADE)
+    custom_url = models.CharField(max_length=200, blank=True, null=True, help_text="optional if you set a page")
+    display_order = models.IntegerField(default=999)
+
+    class Meta:
+        ordering =['display_order']
+
+    def clean(self):
+        if not self.page and self.custom_url:
+            raise ValidationError('You need to assign a page or set custom URL!')
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.title
+
+    def get_url(self):
+        if self.custom_url:
+            return self.custom_url
+
+        return reverse('page_detail', kwargs={'slug': self.page.slug})
+    get_url.short_description = 'URL'
+
+
 class Page(models.Model):
     title = models.CharField(max_length=255)
     slug = models.SlugField(unique=True, help_text="Unique URL for this page")
     content = tinymce_models.HTMLField()
+
 
     def __str__(self):
         return self.title
