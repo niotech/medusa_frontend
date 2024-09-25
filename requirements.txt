@@ -11,13 +11,18 @@ click-repl==0.3.0
 cron-descriptor==1.4.5
 Django==5.0.6
 django-celery-beat==2.7.0
+django-environ==0.11.2
 django-timezone-field==7.0
 django-tinymce==4.1.0
+gunicorn==23.0.0
+h11==0.14.0
 idna==3.7
 kombu==5.4.2
+packaging==24.1
 pillow==10.4.0
 prompt_toolkit==3.0.47
 pypng==0.20220715.0
+PySocks==1.7.1
 python-crontab==3.2.0
 python-dateutil==2.9.0.post0
 python-dotenv==1.0.1
@@ -30,6 +35,7 @@ tk==0.1.0
 typing_extensions==4.12.2
 tzdata==2024.1
 urllib3==2.2.2
+uvicorn==0.30.6
 vine==5.1.0
 wcwidth==0.2.13
 whitenoise==6.7.0

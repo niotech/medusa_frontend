@@ -105,6 +105,7 @@ TEMPLATES = [
                 'web.context_processors.collections_processor',
                 'web.context_processors.auth_token_processor',
                 'web.context_processors.site_settings',
+                'web.context_processors.footer_nav_items',
             ],
         },
     },
