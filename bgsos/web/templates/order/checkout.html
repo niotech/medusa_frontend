@@ -11,12 +11,14 @@ Checkout
     <form action="{% url 'checkout' %}" method="post">
         {% csrf_token %}
         <div class="form-row">
+            {% if not request.session.auth_token %}
             <div class="form-group col-md-6">
                 <label for="username">Email/Telegram</label>
                 <input type="text" class="form-control" id="username" name="username" value="{{ request.session.customer_data.email | strip_tg }}" required>
             </div>
             <div class="form-group col-md-6">
             </div>
+            {% endif %}
             <div class="form-group col-md-6">
                 <label for="first_name">First Name</label>
                 <input type="text" class="form-control" id="first_name" name="first_name" value="" required>
