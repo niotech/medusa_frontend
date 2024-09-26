@@ -13,7 +13,6 @@ def login_required(view_func):
         # check on medusa for user
         response = get_customer_profile(request.COOKIES['auth_token'])
         if response.status_code != 200:
-            print('response status not 200')
             medusa_customer_logout(request.COOKIES['auth_token'])
             request.session.clear()
             response = redirect(reverse('customer_signin'))
