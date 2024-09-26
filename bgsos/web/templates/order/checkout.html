@@ -11,7 +11,7 @@ Checkout
     <form action="{% url 'checkout' %}" method="post">
         {% csrf_token %}
         <div class="form-row">
-            {% if not request.session.auth_token %}
+            {% if not request.COOKIES.auth_token %}
             <div class="form-group col-md-6">
                 <label for="username">Email/Telegram</label>
                 <input type="text" class="form-control" id="username" name="username" value="{{ request.session.customer_data.email | strip_tg }}" required>

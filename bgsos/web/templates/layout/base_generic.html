@@ -55,7 +55,7 @@
             Cart
         </a>
 
-        {% if request.session.auth_token %}
+        {% if request.COOKIES.auth_token %}
             <!-- Content visible only if auth_token exists -->
             <a class="nav-link text-white-50 text-secondary" href="{% url 'customer_profile' %}">
                 <span data-feather="user"></span>
