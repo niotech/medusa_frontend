@@ -28,7 +28,7 @@
                                 {% for collection in collections %}
                                 <li><a href="{% url 'collection_products' collection.id %}">{{ collection.title }}</a></li>    
                                 {% endfor %}
-                                {% if request.session.auth_token %}
+                                {% if request.COOKIES.auth_token %}
                                 <li class="cart"><a href="{% url 'customer_logout' %}"><i class="icon-user"></i> Logout</a></li>
                                 <li class="cart"><a href="{% url 'customer_profile' %}"><i class="icon-user"></i> Profile</a></li>
                                 <li class="cart"><a href="{% url 'customer_orders' %}"><i class="icon-clipboard3"></i> Orders</a></li>
