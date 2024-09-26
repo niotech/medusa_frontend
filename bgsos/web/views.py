@@ -37,7 +37,8 @@ from web.services.services import (
     get_invoice_details,
     get_customer_level,
     get_current_customer,
-    get_featured_products
+    get_featured_products,
+    customer_logout as medusa_customer_logout
 )
 from .forms import SignUpForm, SignInForm, NewPasswordForm, ContactForm
 from .models import SiteSettings, Page, Contact
@@ -916,9 +917,19 @@ def customer_signin(request):
 
             customer_token = customer.json().get('access_token')
 
-            request.session['auth_token'] = customer_token
 
-            return redirect('customer_profile')
+            # request.session['auth_token'] = customer_token
+
+            response = redirect('customer_profile')
+            response.set_cookie(
+                'auth_token',
+                customer_token,
+                httponly=True,
+                secure=True,
+                samesite='Strict',
+                max_age=3600
+            )
+            return response
     else:
         form = SignInForm()
         
@@ -927,7 +938,7 @@ def customer_signin(request):
 
 @login_required
 def customer_profile(request):
-    auth_token = request.session.get('auth_token')
+    auth_token = request.COOKIES['auth_token']
 
     if auth_token:
         # Assuming this function fetches the customer profile using the auth_token
@@ -971,7 +982,7 @@ def customer_profile(request):
         return redirect('customer_signin')
 
 # def customer_profile(request):
-#     auth_token = request.session.get('auth_token')
+#     auth_token = request.COOKIES['auth_token']
 
 #     if auth_token:
 #         try:
@@ -1040,13 +1051,16 @@ def handle_default_level_data():
 
 @login_required
 def customer_logout(request):
+    medusa_customer_logout(request.COOKIES['auth_token'])
     request.session.clear()
-    return redirect('customer_signin')
+    response = redirect('customer_signin')
+    response.delete_cookie('auth_token')
+    return response
 
 
 @login_required
 def change_password(request):
-    auth_token = request.session.get('auth_token')
+    auth_token = request.COOKIES['auth_token']
 
     if not auth_token:
         return redirect('customer_signin')  # Redirect to sign-in if not authenticated
@@ -1074,7 +1088,7 @@ def change_password(request):
 
 @login_required
 def customer_orders(request):
-    auth_token = request.session.get('auth_token')
+    auth_token = request.COOKIES['auth_token']
 
     if not auth_token:
         return redirect('customer_signin')
