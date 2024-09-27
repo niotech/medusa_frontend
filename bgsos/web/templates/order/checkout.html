@@ -18,6 +18,8 @@ Checkout
             </div>
             <div class="form-group col-md-6">
             </div>
+            {% else %}
+            <input type="hidden" name="username" value="{{ request.session.customer_data.email |strip_tg }}">
             {% endif %}
             <div class="form-group col-md-6">
                 <label for="first_name">First Name</label>

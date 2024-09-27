@@ -9,37 +9,7 @@ import requests
 import qrcode
 import base64
 from io import BytesIO
-from web.services.services import (
-    create_cart,
-    add_to_cart,
-    remove_from_cart,
-    get_cart_detail,
-    get_products,
-    browse_all_products,
-    get_collections,
-    get_collection_name,
-    update_shipping_details,
-    confirm_order,
-    update_cart,
-    update_line_item,
-    shipping_method,
-    create_payment_session,
-    select_payment_session,
-    get_shipping_options,
-    create_customer,
-    customer_login,
-    check_email_exists,
-    login_jwt,
-    get_customer_profile,
-    change_customer_password,
-    my_orders,
-    create_payment,
-    get_invoice_details,
-    get_customer_level,
-    get_current_customer,
-    get_featured_products,
-    customer_logout as medusa_customer_logout
-)
+from web.services.services import MedusaStore
 from .forms import SignUpForm, SignInForm, NewPasswordForm, ContactForm
 from .models import SiteSettings, Page, Contact
 from django.contrib import messages
@@ -48,6 +18,7 @@ from web.utils import generate_random_name  # Import the function
 
 from django.views.generic import DetailView, TemplateView
 
+medusa_store = MedusaStore()
 
 def set_cart_flow(request, current_page='cart'):
     if 'cart_flow' not in request.session:
@@ -78,7 +49,7 @@ def index_view(request):
 
 ### Product list for index
 def get_product_list():
-    response = browse_all_products()
+    response = medusa_store.browse_all_products()
     if response.status_code == 200:
         products_data = response.json()
         return products_data.get('products', [])
@@ -88,7 +59,7 @@ def get_product_list():
 
 ##
 def product_list_view(request):
-    response = browse_all_products()
+    response = medusa_store.browse_all_products()
     ##print('response', response)
 
     ##print(response.text)  # Print the raw response text for debugging
@@ -103,7 +74,7 @@ def product_list_view(request):
 
 
 def product_detail_view(request, product_id):
-    response = get_products(product_id=product_id)
+    response = medusa_store.get_products(product_id=product_id)
     if response.status_code == 200:
         product = response.json().get('product')
         # print(product.get('variants'))
@@ -131,7 +102,7 @@ def add_to_cart_view(request, variant_id=None, qty=1):
         # If there is no cart_id in the session, create one
         try:
             region_id = settings.REGION_ID
-            cart = create_cart(region_id)
+            cart = medusa_store.create_cart(region_id)
             cart_id = cart['id']
             request.session['cart_id'] = cart_id
 
@@ -142,7 +113,7 @@ def add_to_cart_view(request, variant_id=None, qty=1):
         # reset qr payment if new
         for method in ['btc', 'usdt', 'xmr']:
             clear_cart_data(method, request, False)
-        add_to_cart(cart_id, variant_id, qty)
+        medusa_store.add_to_cart(cart_id, variant_id, qty)
         return redirect('cart_detail')
     except Exception as e:
         return render(request, 'general/error.html', {'message': f'Failed to add item to cart'})
@@ -175,7 +146,7 @@ def create_cart_view(request):
     if not cart_id:
         try:
             # region_id = settings.REGION_ID
-            cart = create_cart()
+            cart = medusa_store.create_cart()
             cart_id = cart['id']
             request.session['cart_id'] = cart_id
             return redirect('cart_detail')
@@ -183,7 +154,7 @@ def create_cart_view(request):
             return render(request, 'general/error.html', {'message': f'Failed to create cart.'})
 
     try:
-        cart = get_cart_detail(cart_id)
+        cart = medusa_store.get_cart_detail(cart_id)
         return render(request, 'product/cart_detail.html', {'cart': cart})
     except Exception as e:
         return render(request, 'general/error.html', {'message': f'Failed to retrieve cart details.'})
@@ -214,12 +185,12 @@ def cart_detail_view(request):
         # If there is no cart_id in the session, create one
         region_id = settings.REGION_ID
         #print(region_id)
-        cart_response = create_cart()
+        cart_response = medusa_store.create_cart()
 
         request.session['cart_id'] = cart_response['id']
 
     try:
-        cart_response = get_cart_detail(cart_id)
+        cart_response = medusa_store.get_cart_detail(cart_id)
         if cart_response.status_code == 200:
             cart = cart_response.json()['cart']  # Convert response to JSON and extract the 'cart' key
 
@@ -228,7 +199,7 @@ def cart_detail_view(request):
             return render(request, 'order/cart_detail.html', {'cart': cart})
         else:
             # force cart complete
-            confirm_order(cart_id)
+            medusa_store.confirm_order(cart_id)
             clear_cart_data_all(request)
 
 
@@ -259,7 +230,7 @@ def update_cart_item_view(request, item_id):
         if not cart_id:
             return redirect('cart_detail')
         try:
-            update_line_item(cart_id, item_id, int(new_quantity))
+            medusa_store.update_line_item(cart_id, item_id, int(new_quantity))
             return redirect('cart_detail')
         except Exception as e:
             return render(request, 'general/error.html', {'message': f'Failed to update item quantity.'})
@@ -270,7 +241,7 @@ def remove_from_cart_view(request, item_id):
     if not cart_id:
         return redirect('cart_detail')
     try:
-        remove_from_cart(cart_id, item_id)
+        medusa_store.remove_from_cart(cart_id, item_id)
         return redirect('cart_detail')
     except Exception as e:
         return render(request, 'general/error.html', {'message': f'Failed to remove item from cart.'})
@@ -278,7 +249,7 @@ def remove_from_cart_view(request, item_id):
 
 ## WORKS
 def collections_view(request):
-    response = get_collections()
+    response = medusa_store.get_collections()
     #print(response.text)  # Print the raw response text for debugging
     if response.status_code == 200:
         collections_data = response.json()
@@ -293,8 +264,8 @@ def collections_view(request):
 ## END WORKS
 
 def collection_products_view(request, collection_id):
-    response = get_products(collection_id=collection_id)
-    collection = get_collection_name(collection_id)
+    response = medusa_store.get_products(collection_id=collection_id)
+    collection = medusa_store.get_collection_name(collection_id)
     #print(collection)
     # products = Product.objects.filter(collection=collection)
     #print(response.text)  # Print the raw response text for debugging
@@ -312,7 +283,7 @@ def collection_products_view(request, collection_id):
 def update_shipping_view(request, cart_id):
     if request.method == 'POST':
         data = request.POST.dict()
-        response = update_shipping_details(cart_id, data)
+        response = medusa_store.update_shipping_details(cart_id, data)
         if response.status_code == 200:
             return redirect('cart_detail', cart_id=cart_id)
         else:
@@ -326,7 +297,7 @@ def confirm_order_view(request):
     if not cart_id:
         return render(request, 'general/error.html', {'message': 'No cart found. Please add items to your cart first.'})
 
-    response = confirm_order(cart_id)
+    response = medusa_store.confirm_order(cart_id)
     if response.status_code == 200:
         order_details = response.json()
         return render(request, 'order/order_confirmation.html', {'order': order_details})
@@ -340,7 +311,7 @@ def confirm_order_view(request):
 def update_cart_view(request, cart_id):
     if request.method == 'POST':
         data = request.POST.dict()
-        response = update_cart(cart_id, data)
+        response = medusa_store.update_cart(cart_id, data)
         if response.status_code == 200:
             return redirect('cart_detail', cart_id=cart_id)
         else:
@@ -374,13 +345,13 @@ def update_cart_view(request, cart_id):
 def select_shipping_method_view(request, cart_id):
     if request.method == 'POST':
         option_id = request.POST.get('option_id')
-        response = shipping_method(cart_id, option_id)
+        response = medusa_store.shipping_method(cart_id, option_id)
         if response.status_code == 200:
             return redirect('cart_detail', cart_id=cart_id)
         else:
             return render(request, 'general/error.html', {'message': 'Failed to select shipping method'})
     else:
-        shipping_options = get_shipping_options(cart_id).json()
+        shipping_options = medusa_store.get_shipping_options(cart_id).json()
         return render(request, 'order/shipping_method.html',
                       {'cart_id': cart_id, 'shipping_options': shipping_options})
 
@@ -391,6 +362,8 @@ def checkout_view(request):
         return redirect(redir_url)
 
     cart_id = request.session.get('cart_id')
+
+    print(request.POST)
     
     if request.method == 'POST':
         username_or_email = request.POST.get('username')
@@ -414,13 +387,13 @@ def checkout_view(request):
         }
 
         try:
-            updated_shipping_details = update_shipping_details(cart_id, data)
+            updated_shipping_details = medusa_store.update_shipping_details(cart_id, data)
             if updated_shipping_details.status_code == 200:
                 return redirect('shipping_methods')
             return redirect('shipping_methods')
         except Exception as e:
             # force cart complete
-            confirm_order(cart_id)
+            medusa_store.confirm_order(cart_id)
             clear_cart_data_all(request)
 
 
@@ -483,10 +456,10 @@ def show_btc_address(request):
 
 
     cart_id = request.session.get('cart_id')
-    cart_details = get_cart_detail(cart_id)
+    cart_details = medusa_store.get_cart_detail(cart_id)
     # print("Cart:", cart_details)
     # create and select payment session
-    created_payment_session = create_payment_session(cart_id)
+    created_payment_session = medusa_store.create_payment_session(cart_id)
 
     params = {
         'amount': cart_details.json().get('cart').get('total') / 100,
@@ -496,11 +469,11 @@ def show_btc_address(request):
     print(f"Total: {params['amount']}")
 
     if created_payment_session.status_code == 200:
-        selected_payment_session = select_payment_session(cart_id, 'manual')
+        selected_payment_session = medusa_store.select_payment_session(cart_id, 'manual')
 
 
     # completes the cart
-    cart_complete = confirm_order(cart_id)
+    cart_complete = medusa_store.confirm_order(cart_id)
     #print("Cart ID:", cart_id)
     #print("Cart complete:", cart_complete.json())
 
@@ -511,10 +484,10 @@ def show_btc_address(request):
         'orderId': cart_complete.json().get('data').get('id')
     }
 
-    response = create_payment(params)
+    response = medusa_store.create_payment(params)
     #print("Params", params)
 
-    address_response = get_invoice_details(response.json().get('id'))
+    address_response = medusa_store.get_invoice_details(response.json().get('id'))
     #print(address_response)
 
     btc_address = address_response.json()[0].get('destination')
@@ -538,7 +511,7 @@ def show_btc_address(request):
     img_str = base64.b64encode(buffered.getvalue()).decode()
 
     # completes the cart
-    cart_complete = confirm_order(cart_id)
+    cart_complete = medusa_store.confirm_order(cart_id)
 
     #print('Cart Complete', cart_complete.json())
 
@@ -568,13 +541,13 @@ def show_usdt_address(request):
                   {'qr_code': img_str, 'usdt_address': usdt_address, 'amount': usdt_amount})
 
     cart_id = request.session.get('cart_id')
-    cart_details = get_cart_detail(cart_id)
+    cart_details = medusa_store.get_cart_detail(cart_id)
 
     # create and select payment session
-    created_payment_session = create_payment_session(cart_id)
+    created_payment_session = medusa_store.create_payment_session(cart_id)
 
     if created_payment_session.status_code == 200:
-        selected_payment_session = select_payment_session(cart_id, 'manual')
+        selected_payment_session = medusa_store.select_payment_session(cart_id, 'manual')
 
     now_pay_config = {
         "url": settings.USDT_URL,
@@ -586,7 +559,7 @@ def show_usdt_address(request):
 
     # completes the cart
     # Confirm the order and get the response JSON
-    response_json = confirm_order(cart_id).json()
+    response_json = medusa_store.confirm_order(cart_id).json()
 
     # Extract the order ID with default to None if keys are missing
     order_id = response_json.get('data', {}).get('id')
@@ -666,13 +639,13 @@ def show_xmr_address(request):
                   {'qr_code': img_str, 'xmr_address': xmr_address, 'amount': xmr_amount})
 
     cart_id = request.session.get('cart_id')
-    cart_details = get_cart_detail(cart_id)
+    cart_details = medusa_store.get_cart_detail(cart_id)
 
     # create and select payment session
-    created_payment_session = create_payment_session(cart_id)
+    created_payment_session = medusa_store.create_payment_session(cart_id)
 
     if created_payment_session.status_code == 200:
-        selected_payment_session = select_payment_session(cart_id, 'manual')
+        selected_payment_session = medusa_store.select_payment_session(cart_id, 'manual')
 
 
     currency_code = cart_details.json().get('cart').get('region').get('currency_code')
@@ -706,7 +679,7 @@ def show_xmr_address(request):
     img_str = base64.b64encode(buffered.getvalue()).decode()
 
     # completes the cart
-    cart_complete = confirm_order(cart_id)
+    cart_complete = medusa_store.confirm_order(cart_id)
 
     #print('Cart Complete', cart_complete.json())
 
@@ -753,10 +726,10 @@ def shipping_methods(request):
         try:
             selected_option_id = request.POST.get('option_id')
             request.session['selected_option_id'] = selected_option_id
-            selected_shipping_method = shipping_method(cart_id, selected_option_id)
+            selected_shipping_method = medusa_store.shipping_method(cart_id, selected_option_id)
         except Exception as e:
             # force cart complete
-            confirm_order(cart_id)
+            medusa_store.confirm_order(cart_id)
             clear_cart_data_all(request)
 
             print(str(e))
@@ -768,10 +741,10 @@ def shipping_methods(request):
 
     cart_id = request.session.get('cart_id')
     try:
-        available_shipping_methods = get_shipping_options(cart_id)
+        available_shipping_methods = medusa_store.get_shipping_options(cart_id)
     except Exception as e:
         # force cart complete
-        confirm_order(cart_id)
+        medusa_store.confirm_order(cart_id)
         clear_cart_data_all(request)
 
 
@@ -782,7 +755,7 @@ def shipping_methods(request):
 
 
 def create_payment_session_view(request, cart_id):
-    response = create_payment_session(cart_id)
+    response = medusa_store.create_payment_session(cart_id)
     if response.status_code == 200:
         return redirect('cart_detail', cart_id=cart_id)
     else:
@@ -792,7 +765,7 @@ def create_payment_session_view(request, cart_id):
 def select_payment_session_view(request, cart_id):
     if request.method == 'POST':
         provider_id = request.POST.get('provider_id')
-        response = select_payment_session(cart_id, provider_id)
+        response = medusa_store.select_payment_session(cart_id, provider_id)
         if response.status_code == 200:
             return redirect('cart_detail', cart_id=cart_id)
         else:
@@ -856,12 +829,12 @@ def customer_signup(request):
             }
 
             # Check if user exists
-            customer = check_email_exists(email)
+            customer = medusa_store.check_email_exists(email)
 
             if customer.json().get('exists'):
                 messages.error(request, 'Email already registered! Please log in.')
             else:
-                create_customer(data)
+                medusa_store.create_customer(data)
                 messages.success(request, 'Account created successfully! Please log in.')
                 # Optionally, you can clear the form after successful signup
                 form = SignUpForm()
@@ -909,7 +882,7 @@ def customer_signin(request):
             email = form.cleaned_data.get('email')
             password = form.cleaned_data.get('password')
 
-            customer = login_jwt(email, password)
+            customer = medusa_store.login_jwt(email, password)
             
             if customer.text == 'Unauthorized':
                 messages.error(request, 'Incorrect Email or Password')
@@ -940,16 +913,23 @@ def customer_signin(request):
 def customer_profile(request):
     auth_token = request.COOKIES['auth_token']
 
+    print('-- CUSTOMER PROFILE PAGE --')
+    print('::COOKIES::')
+    print(request.COOKIES)
+
+    print('::session::')
+    print(request.session.items())
+
     if auth_token:
         # Assuming this function fetches the customer profile using the auth_token
-        current_customer = get_customer_profile(auth_token)
+        current_customer = medusa_store.get_customer_profile(auth_token)
         #print(current_customer.json())
         if current_customer.status_code == 200:
             # Extract customer data from the response
             customer_data = current_customer.json().get('customer')
 
             # Store customer data in session
-            request.session['customer_data'] = customer_data
+            # request.session['customer_data'] = customer_data
             email = customer_data.get('email')
 
             # print(email)
@@ -964,7 +944,7 @@ def customer_profile(request):
 
             # Fetch customer level data using email
             try:
-                level_response = get_customer_level(email)
+                level_response = medusa_store.get_customer_level(email)
                 # Check if the response has a status code and is successful
                 if hasattr(level_response, 'status_code') and level_response.status_code == 200:
                     # Extract level data
@@ -1051,10 +1031,25 @@ def handle_default_level_data():
 
 @login_required
 def customer_logout(request):
-    medusa_customer_logout(request.COOKIES['auth_token'])
+    print('-- BEFORE LOGOUT PROCESS --')
+    print('::COOKIES::')
+    print(request.COOKIES)
+
+    print('::session::')
+    print(request.session.items())
+
+    medusa_store.customer_logout(request.COOKIES['auth_token'])
     request.session.clear()
     response = redirect('customer_signin')
     response.delete_cookie('auth_token')
+
+    print('-- AFTER LOGOUT PROCESS --')
+    print('::COOKIES::')
+    print(request.COOKIES)
+
+    print('::session::')
+    print(request.session.items())
+
     return response
 
 
@@ -1072,7 +1067,7 @@ def change_password(request):
             new_password = form.cleaned_data.get('password')
 
             # Call function to change password
-            changed_pass = change_customer_password(auth_token, new_password)
+            changed_pass = medusa_store.change_customer_password(auth_token, new_password)
 
             if changed_pass.status_code == 200:
                 # Password changed successfully, redirect to sign-in or profile
@@ -1097,7 +1092,7 @@ def customer_orders(request):
     limit = 10
     offset = (int(page) - 1) * limit
 
-    orders_data = my_orders(auth_token, offset=offset, limit=limit)
+    orders_data = medusa_store.my_orders(auth_token, offset=offset, limit=limit)
     #print("Orders:", orders_data.json())
 
     orders_list = orders_data.json().get('orders', [])
@@ -1119,7 +1114,7 @@ def add_coupon_code(request):
     if request.method == 'POST':
         coupon_code = request.POST.get('coupon_code')
         cart_id = request.session.get('cart_id')
-        response = update_cart(cart_id, {
+        response = medusa_store.update_cart(cart_id, {
             "discounts": [{
                 "code": coupon_code
             }]

@@ -86,14 +86,16 @@ def strip_tg_prof(email):
 
 @register.filter
 def cache_image(url):
-    from web.services.services import session
+    from web.services.services import MedusaStore
+
+    medusa_store = MedusaStore()
 
 
     filename = url.split('/')[-1]
     local_path = os.path.join(settings.MEDIA_ROOT, 'images', filename)
     
     if not os.path.exists(local_path):
-        response = session.get(url, stream=True)
+        response = medusa_store.session.get(url, stream=True)
         if response.status_code == 200:
             
             os.makedirs(os.path.dirname(local_path), exist_ok=True)
