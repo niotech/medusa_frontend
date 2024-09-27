@@ -10,6 +10,7 @@ import qrcode
 import base64
 from io import BytesIO
 from web.services.services import MedusaStore
+from web.services.admin_services import MedusaAdminAPI
 from .forms import SignUpForm, SignInForm, NewPasswordForm, ContactForm
 from .models import SiteSettings, Page, Contact
 from django.contrib import messages
@@ -19,6 +20,7 @@ from web.utils import generate_random_name  # Import the function
 from django.views.generic import DetailView, TemplateView
 
 medusa_store = MedusaStore()
+medusa_admin = MedusaAdminAPI()
 
 def set_cart_flow(request, current_page='cart'):
     if 'cart_flow' not in request.session:
@@ -34,10 +36,13 @@ def set_cart_flow(request, current_page='cart'):
         request.session['cart_flow'][current_page] = True
         request.session.save()
 
-    if current_page != 'qr_page' and  request.session['cart_flow']['payment_method'] and request.session['cart_flow']['qr_page'] and 'selected_payment_method' in request.session:
-        return True, f'show_{request.session["selected_payment_method"]}_address'
+    # if current_page != 'qr_page' and  request.session['cart_flow']['payment_method'] and request.session['cart_flow']['qr_page'] and 'selected_payment_method' in request.session:
+    #     print('QR_PAGE REDIRECT FROM CART FLOW')
+    #     print(f'current_page = {current_page}')
+    #     return True, f'show_{request.session["selected_payment_method"]}_address'
 
     if current_page != 'payment_method' and request.session['cart_flow']['shipping_method'] and 'selected_option_id' in request.session and request.session['cart_flow']['payment_method']:
+        print('PAYMENT METHOD REDIRECT FROM CART FLOW')
         return True, 'show_payment_options'
 
     return False, ''
@@ -834,7 +839,7 @@ def customer_signup(request):
             if customer.json().get('exists'):
                 messages.error(request, 'Email already registered! Please log in.')
             else:
-                medusa_store.create_customer(data)
+                response = medusa_admin.create_customer(data)
                 messages.success(request, 'Account created successfully! Please log in.')
                 # Optionally, you can clear the form after successful signup
                 form = SignUpForm()
@@ -912,13 +917,6 @@ def customer_signin(request):
 @login_required
 def customer_profile(request):
     auth_token = request.COOKIES['auth_token']
-
-    print('-- CUSTOMER PROFILE PAGE --')
-    print('::COOKIES::')
-    print(request.COOKIES)
-
-    print('::session::')
-    print(request.session.items())
 
     if auth_token:
         # Assuming this function fetches the customer profile using the auth_token
@@ -1031,24 +1029,10 @@ def handle_default_level_data():
 
 @login_required
 def customer_logout(request):
-    print('-- BEFORE LOGOUT PROCESS --')
-    print('::COOKIES::')
-    print(request.COOKIES)
-
-    print('::session::')
-    print(request.session.items())
-
     medusa_store.customer_logout(request.COOKIES['auth_token'])
     request.session.clear()
     response = redirect('customer_signin')
     response.delete_cookie('auth_token')
-
-    print('-- AFTER LOGOUT PROCESS --')
-    print('::COOKIES::')
-    print(request.COOKIES)
-
-    print('::session::')
-    print(request.session.items())
 
     return response
 

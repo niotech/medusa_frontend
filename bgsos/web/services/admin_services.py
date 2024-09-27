@@ -42,7 +42,6 @@ class MedusaAdminAPI():
 
         # self.session.headers.update({'x-publishable-api-key': publishableApiKey})
 
-
         # Comment out to disable proxy
         self.session.proxies.update(self.proxies)
 
@@ -78,6 +77,14 @@ class MedusaAdminAPI():
 
         self.incomplete_orders = response.json().get('orders')
 
+    def create_customer(self, data):
+        headers = {
+            "Authorization": f"Bearer {self.auth_token}",
+            "Content-Type": "application/json",
+        }
+
+        data: data
+        return self.session.post(f'{self.backendUrl}/admin/customers', headers=headers, json=data)
 
     def capture_btc_payment(self):
         self.get_incomplete_orders()

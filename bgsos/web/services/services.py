@@ -309,11 +309,11 @@ class MedusaStore:
 
     def get_customer_level(self, username):
         headers = {
-            'Authorization': f'Basic {auth_token_level}'
+            'Authorization': f'Basic {self.auth_token_level}'
         }
 
         try:
-            response = self.session.get(f'{levelsUrl}/api/public/customerdetail?username={username}', headers=headers)
+            response = self.session.get(f'{self.levelsUrl}/api/public/customerdetail?username={username}', headers=headers)
             response.raise_for_status()  # Raises HTTPError for bad responses (4xx, 5xx)
             return response.json()  # Return the JSON data if the request is successful
         except self.session.ConnectionError:
@@ -331,7 +331,7 @@ class MedusaStore:
 
     # def get_customer_level(email):
     #     headers = {
-    #         'Authorization': f'Basic {auth_token_level}'
+    #         'Authorization': f'Basic {self.auth_token_level}'
     #     }
     #     try:
     #         response = session.get(
