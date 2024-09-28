@@ -22,6 +22,7 @@ from django.views.generic import DetailView, TemplateView
 medusa_store = MedusaStore()
 medusa_admin = MedusaAdminAPI()
 
+
 def set_cart_flow(request, current_page='cart'):
     if 'cart_flow' not in request.session:
         request.session['cart_flow'] = {
@@ -36,18 +37,53 @@ def set_cart_flow(request, current_page='cart'):
         request.session['cart_flow'][current_page] = True
         request.session.save()
 
-    # if current_page != 'qr_page' and  request.session['cart_flow']['payment_method'] and request.session['cart_flow']['qr_page'] and 'selected_payment_method' in request.session:
-    #     print('QR_PAGE REDIRECT FROM CART FLOW')
-    #     print(f'current_page = {current_page}')
-    #     return True, f'show_{request.session["selected_payment_method"]}_address'
+    if current_page != 'qr_page' and  request.session['cart_flow']['payment_method'] and request.session['cart_flow']['qr_page'] and 'selected_payment_method' in request.session:
+        return True, f'show_{request.session["selected_payment_method"]}_address'
 
     if current_page != 'payment_method' and request.session['cart_flow']['shipping_method'] and 'selected_option_id' in request.session and request.session['cart_flow']['payment_method']:
-        print('PAYMENT METHOD REDIRECT FROM CART FLOW')
         return True, 'show_payment_options'
 
     return False, ''
 
-##
+
+def clear_cart_data_all(request, remove_cart_id=True):
+    for method in ['btc', 'usdt', 'xmr']:
+        clear_cart_data(method, request, remove_cart_id)
+
+
+# you have to work on this
+def clear_cart_data(method, request, remove_cart_id=True):
+    """
+        method: the payment method: btc, usdt, xmr
+        request: the origin request
+        remove_cart_id: if true it will remove cart_id from session, forcing new cart
+    """
+
+    if remove_cart_id and 'cart_id' in request.session:
+        del request.session['cart_id']
+
+    if 'selected_option_id' in request.session:
+        del request.session['selected_option_id']
+    if f'has_{method}_payment' in request.session:
+        del request.session[f'has_{method}_payment']
+    if 'img_str' in request.session:
+        del request.session['img_str']
+    if f'{method}_address' in request.session:
+        del request.session[f'{method}_address']
+    if f'{method}_amount' in request.session:
+        del request.session[f'{method}_amount']
+    if f'has_{method}_payment' in request.session:
+        del request.session[f'has_{method}_payment']
+
+    if 'cart_flow' in request.session:
+        del request.session['cart_flow']
+
+    if 'selected_payment_method' in request.session:
+        del request.session['selected_payment_method']
+
+    request.session.save()
+
+
 def index_view(request):    
     return render(request, 'page/index.html', {})
 
@@ -407,44 +443,6 @@ def checkout_view(request):
     return render(request, 'order/checkout.html')
 
 
-def clear_cart_data_all(request, remove_cart_id=True):
-    for method in ['btc', 'usdt', 'xmr']:
-        clear_cart_data(method, request, remove_cart_id)
-
-
-# you have to work on this
-def clear_cart_data(method, request, remove_cart_id=True):
-    """
-        method: the payment method: btc, usdt, xmr
-        request: the origin request
-        remove_cart_id: if true it will remove cart_id from session, forcing new cart
-    """
-
-    if remove_cart_id and 'cart_id' in request.session:
-        del request.session['cart_id']
-
-    if 'selected_option_id' in request.session:
-        del request.session['selected_option_id']
-    if f'has_{method}_payment' in request.session:
-        del request.session[f'has_{method}_payment']
-    if 'img_str' in request.session:
-        del request.session['img_str']
-    if f'{method}_address' in request.session:
-        del request.session[f'{method}_address']
-    if f'{method}_amount' in request.session:
-        del request.session[f'{method}_amount']
-    if f'has_{method}_payment' in request.session:
-        del request.session[f'has_{method}_payment']
-
-    if 'cart_flow' in request.session:
-        del request.session['cart_flow']
-
-    if 'selected_payment_method' in request.session:
-        del request.session['selected_payment_method']
-
-    request.session.save()
-
-
 def show_btc_address(request):
     set_cart_flow(request, 'qr_page')  # ['cart', 'checkout', 'shipping_method', 'payment_method', 'qr_page']
 
@@ -483,6 +481,11 @@ def show_btc_address(request):
     #print("Cart complete:", cart_complete.json())
 
     if not cart_complete.json().get('data'):
+        if cart_complete.status_code in [422, 400]: # invalid request error (payment exists)
+            clear_cart_data_all(request)
+            return render(request, 'general/error.html',
+                          {'message': f'Failed to process your cart.'})
+
         return redirect('cart_detail')
 
     params['metadata'] = {
@@ -517,8 +520,6 @@ def show_btc_address(request):
 
     # completes the cart
     cart_complete = medusa_store.confirm_order(cart_id)
-
-    #print('Cart Complete', cart_complete.json())
 
     del request.session['cart_id']
 
@@ -568,7 +569,6 @@ def show_usdt_address(request):
 
     # Extract the order ID with default to None if keys are missing
     order_id = response_json.get('data', {}).get('id')
-    #print('Cart Complete', cart_complete.json())
 
     # Get USDT Rate
     conversion_response = requests.get(
@@ -685,8 +685,6 @@ def show_xmr_address(request):
 
     # completes the cart
     cart_complete = medusa_store.confirm_order(cart_id)
-
-    #print('Cart Complete', cart_complete.json())
 
     del request.session['cart_id']
 
@@ -921,16 +919,14 @@ def customer_profile(request):
     if auth_token:
         # Assuming this function fetches the customer profile using the auth_token
         current_customer = medusa_store.get_customer_profile(auth_token)
-        #print(current_customer.json())
         if current_customer.status_code == 200:
             # Extract customer data from the response
             customer_data = current_customer.json().get('customer')
 
             # Store customer data in session
-            # request.session['customer_data'] = customer_data
+            request.session['customer_data'] = customer_data
             email = customer_data.get('email')
 
-            # print(email)
             level_data = {
                 'customer_username': '',
                 'total_points_last_year': '0',
